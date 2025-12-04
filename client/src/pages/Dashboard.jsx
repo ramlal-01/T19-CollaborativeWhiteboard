@@ -6,7 +6,11 @@ import {
   User, 
   LogOut, 
   Settings,
-  ChevronDown
+  ChevronDown,
+  Plus,
+  Trello,
+  Clock,
+  Workflow
 } from 'lucide-react';
 
 const Dashboard = ({ onLogout, onOpenBoard }) => {
@@ -16,7 +20,9 @@ const Dashboard = ({ onLogout, onOpenBoard }) => {
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans text-slate-900">
 
-      {/* TOP NAVBAR */}
+      {/* =============================
+          TOP NAVBAR
+      ============================== */}
       <nav className="h-18 bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 lg:px-8 
                       flex items-center justify-between sticky top-0 z-50">
 
@@ -53,7 +59,7 @@ const Dashboard = ({ onLogout, onOpenBoard }) => {
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
           </button>
 
-          {/* PROFILE DROPDOWN */}
+          {/* Profile Dropdown */}
           <div className="relative">
 
             <button 
@@ -73,7 +79,7 @@ const Dashboard = ({ onLogout, onOpenBoard }) => {
               <ChevronDown size={14} className={`${profileOpen ? 'rotate-180' : ''} text-slate-400 transition-transform`} />
             </button>
 
-            {/* Dropdown */}
+            {/* DROPDOWN MENU */}
             {profileOpen && (
               <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-xl border p-2 z-50">
                 
@@ -102,8 +108,67 @@ const Dashboard = ({ onLogout, onOpenBoard }) => {
         </div>
       </nav>
 
-      {/* Next parts will be added here */}
 
+      {/* ===================================================
+          PART 2 — NEW BOARD + TEMPLATES SECTION
+      ===================================================== */}
+      <main className="max-w-7xl mx-auto px-6 lg:px-8 py-8 space-y-12">
+
+        <section>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-slate-800">Start a new board</h2>
+            <button className="text-sm font-medium text-indigo-600 hover:text-indigo-700">
+              More templates
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+
+            {/* NEW BOARD */}
+            <div 
+              onClick={onOpenBoard}
+              className="col-span-1 h-32 rounded-xl bg-indigo-600 hover:bg-indigo-700 
+                         transition-all cursor-pointer shadow-lg flex flex-col items-center 
+                         justify-center gap-3 text-white group"
+            >
+              <div className="p-2 bg-white/20 rounded-lg group-hover:scale-110 transition-transform">
+                <Plus size={24} />
+              </div>
+              <span className="font-semibold text-sm">New Board</span>
+            </div>
+
+            {/* Templates */}
+            {[
+              { id: 'kanban', name: 'Kanban', color: 'bg-orange-100', text: 'text-orange-600', icon: <Trello size={20} /> },
+              { id: 'retro', name: 'Retrospective', color: 'bg-purple-100', text: 'text-purple-600', icon: <Clock size={20} /> },
+              { id: 'flow', name: 'Flowchart', color: 'bg-green-100', text: 'text-green-600', icon: <Workflow size={20} /> }
+            ].map((t) => (
+              <div 
+                key={t.id}
+                onClick={onOpenBoard}
+                className="col-span-1 h-32 rounded-xl bg-white border border-slate-200 
+                           hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer 
+                           flex flex-col p-4 group"
+              >
+                <div className={`w-10 h-10 ${t.color} ${t.text} rounded-lg flex items-center 
+                                justify-center mb-auto group-hover:scale-105 transition-transform`}>
+                  {t.icon}
+                </div>
+
+                <div>
+                  <span className="block text-sm font-semibold text-slate-700 
+                                   group-hover:text-indigo-600 transition-colors">
+                    {t.name}
+                  </span>
+                  <span className="text-[10px] text-slate-400">Default layout</span>
+                </div>
+              </div>
+            ))}
+
+          </div>
+        </section>
+
+      </main>
     </div>
   );
 };
