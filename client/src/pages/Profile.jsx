@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   User,
   Edit,
@@ -22,6 +22,7 @@ const Profile = () => {
   // ==========================================
   const [profileLoading, setProfileLoading] = useState(false);
 
+  // 🎯 NEW: load from localStorage if available
   const [displayName, setDisplayName] = useState("Guest User");
   const [profileEmail] = useState("guest@example.com");
   const [avatarUrl, setAvatarUrl] = useState(
@@ -29,6 +30,19 @@ const Profile = () => {
   );
 
   const userId = "LOCAL-USER-12345";
+
+  // 🔄 Load saved profile from localStorage on mount
+  useEffect(() => {
+    const savedName = localStorage.getItem("cw_profile_name");
+    const savedAvatar = localStorage.getItem("cw_profile_avatar");
+
+    if (savedName) {
+      setDisplayName(savedName);
+    }
+    if (savedAvatar) {
+      setAvatarUrl(savedAvatar);
+    }
+  }, []);
 
   // ==========================================
   // TOAST NOTIFICATION
@@ -47,7 +61,11 @@ const Profile = () => {
     if (!file) return showToast("No file selected", "error");
 
     const reader = new FileReader();
-    reader.onloadend = () => setAvatarUrl(reader.result);
+    reader.onloadend = () => {
+      setAvatarUrl(reader.result);
+      // 🔄 NEW: save avatar preview locally
+      localStorage.setItem("cw_profile_avatar", reader.result);
+    };
     reader.readAsDataURL(file);
     showToast("Avatar updated (preview only)");
   };
@@ -59,6 +77,8 @@ const Profile = () => {
     setProfileLoading(true);
     setTimeout(() => {
       setProfileLoading(false);
+      // 🔄 NEW: persist display name to localStorage
+      localStorage.setItem("cw_profile_name", displayName);
       showToast("Profile updated successfully!");
     }, 900);
   };
@@ -112,11 +132,10 @@ const Profile = () => {
   // ==========================================
   return (
     <div className="min-h-screen bg-gray-50 p-6 md:p-10 font-inter relative">
-
       {/* 🔥 TOAST NOTIFICATION */}
       {toast && (
         <div
-          className={`fixed top-4 right-4 px-5 py-3 rounded-lg shadow-xl text-white z-50 flex items-center space-x-3 
+          className={`fixed top-4 right-4 px-5 py-3 rounded-lg shadow-xl text-white z-50 flex items-center space-x-3
             ${toast.type === "success" ? "bg-green-600" : ""}
             ${toast.type === "error" ? "bg-red-600" : ""}
             ${toast.type === "info" ? "bg-blue-600" : ""}
@@ -128,24 +147,30 @@ const Profile = () => {
       )}
 
       <div className="w-full max-w-6xl mx-auto">
-
         {/* HEADER */}
         <div className="flex items-center justify-between border-b pb-4 mb-8">
-          <h1 className="text-3xl font-extrabold flex items-center text-gray-800">
-            <User className="mr-3 text-indigo-600" />
-            User Profile & Settings
-          </h1>
+          <div>
+            <h1 className="text-3xl font-extrabold flex items-center text-gray-800">
+              <User className="mr-3 text-indigo-600" />
+              User Profile & Settings
+            </h1>
+            {/* NEW: subtle subtitle */}
+            <p className="text-sm text-gray-500 mt-1">
+              Manage your local profile details and security preferences.
+            </p>
+          </div>
 
-          <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg shadow-md">
+          <button
+            type="button"
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg shadow-md"
+          >
             Dashboard
           </button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-
           {/* LEFT SECTION */}
           <div className="lg:col-span-8 space-y-8">
-
             {/* PERSONAL DETAILS */}
             <div className="bg-white p-6 rounded-2xl shadow-xl">
               <h2 className="text-2xl font-bold border-b pb-3 mb-6 flex items-center text-gray-800">
@@ -155,15 +180,24 @@ const Profile = () => {
               {/* Avatar */}
               <div className="flex items-center space-x-6 pb-6 border-b">
                 <div className="relative w-28 h-28 rounded-full overflow-hidden border-4 border-indigo-300 shadow-lg group">
-                  <img src={avatarUrl} alt="Avatar" className="object-cover w-full h-full" />
+                  <img
+                    src={avatarUrl}
+                    alt={`Avatar of ${displayName}`}
+                    className="object-cover w-full h-full"
+                  />
 
                   <label
-                    className="absolute inset-0 bg-black bg-opacity-40 text-white flex flex-col 
+                    className="absolute inset-0 bg-black bg-opacity-40 text-white flex flex-col
                     items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition"
                   >
                     <Camera className="w-6 h-6 mb-1" />
                     <span className="text-sm">Upload</span>
-                    <input type="file" className="hidden" onChange={handleAvatarUpload} />
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleAvatarUpload}
+                    />
                   </label>
                 </div>
 
@@ -176,7 +210,9 @@ const Profile = () => {
 
               {/* Username Input */}
               <div className="mt-6">
-                <label className="block text-gray-700 mb-1">Username / Display Name</label>
+                <label className="block text-gray-700 mb-1">
+                  Username / Display Name
+                </label>
                 <input
                   type="text"
                   className="w-full border px-3 py-2 rounded-lg"
@@ -186,9 +222,10 @@ const Profile = () => {
               </div>
 
               <button
+                type="button"
                 onClick={handleProfileSave}
                 disabled={profileLoading}
-                className="mt-6 px-6 py-2 rounded-lg bg-indigo-600 text-white shadow-md flex items-center"
+                className="mt-6 px-6 py-2 rounded-lg bg-indigo-600 text-white shadow-md flex items-center disabled:opacity-70"
               >
                 {profileLoading ? (
                   <Loader2 className="mr-2 w-5 h-5 animate-spin" />
@@ -206,7 +243,6 @@ const Profile = () => {
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-
                 {/* CURRENT PASSWORD */}
                 <div className="relative">
                   <input
@@ -217,6 +253,7 @@ const Profile = () => {
                     onChange={(e) => setCurrentPassword(e.target.value)}
                   />
                   <button
+                    type="button"
                     onClick={() => setShowCurrent(!showCurrent)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
                   >
@@ -234,6 +271,7 @@ const Profile = () => {
                     onChange={(e) => setNewPassword(e.target.value)}
                   />
                   <button
+                    type="button"
                     onClick={() => setShowNew(!showNew)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
                   >
@@ -251,6 +289,7 @@ const Profile = () => {
                     onChange={(e) => setConfirmNewPassword(e.target.value)}
                   />
                   <button
+                    type="button"
                     onClick={() => setShowConfirmNew(!showConfirmNew)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
                   >
@@ -261,9 +300,10 @@ const Profile = () => {
 
               {/* SAVE PASSWORD BUTTON */}
               <button
+                type="button"
                 onClick={handlePasswordChange}
                 disabled={passwordLoading}
-                className="mt-6 px-6 py-2 rounded-lg bg-indigo-600 text-white shadow-md flex items-center"
+                className="mt-6 px-6 py-2 rounded-lg bg-indigo-600 text-white shadow-md flex items-center disabled:opacity-70"
               >
                 {passwordLoading ? (
                   <Loader2 className="mr-2 w-5 h-5 animate-spin" />
@@ -273,12 +313,10 @@ const Profile = () => {
                 {passwordLoading ? "Updating..." : "Change Password"}
               </button>
             </div>
-
           </div>
 
           {/* RIGHT SECTION */}
           <div className="lg:col-span-4 space-y-8">
-
             {/* STATS SECTION */}
             <div className="bg-white p-6 rounded-2xl shadow-xl">
               <h2 className="text-2xl font-bold border-b pb-3 mb-6 flex items-center text-gray-800">
@@ -305,6 +343,7 @@ const Profile = () => {
               </h2>
 
               <button
+                type="button"
                 onClick={handleLogout}
                 className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg shadow mb-4"
               >
@@ -312,15 +351,14 @@ const Profile = () => {
               </button>
 
               <button
+                type="button"
                 onClick={handleDelete}
                 className="w-full px-4 py-2 bg-red-600 text-white rounded-lg shadow"
               >
                 <Trash2 className="mr-2 inline" /> Delete Account
               </button>
             </div>
-
           </div>
-
         </div>
       </div>
     </div>
