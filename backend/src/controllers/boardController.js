@@ -1,115 +1,80 @@
 const Board = require("../models/Board");
 const generateCode = require("../utils/generateCode");
 
-// CREATE NEW BOARD
 exports.createBoard = async (req, res) => {
   try {
-    const { title } = req.body;
-
-    let code = generateCode();
-    let exists = await Board.findOne({ inviteCode: code });
+    let inviteCode = generateCode();
+    let exists = await Board.findOne({ inviteCode });
 
     while (exists) {
-      code = generateCode();
-      exists = await Board.findOne({ inviteCode: code });
+      inviteCode = generateCode();
+      exists = await Board.findOne({ inviteCode });
     }
 
     const board = await Board.create({
-      title: title || "Untitled Board",
+      title: req.body.title || "Untitled",
       owner: req.user._id,
-      inviteCode: code,
+      inviteCode,
       participants: [{ user: req.user._id, role: "owner" }]
     });
 
     res.status(201).json(board);
-
-  } catch (error) {
-    console.error("Create Error:", error);
-    res.status(500).json({ message: "Server Error" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-// LOAD USER’S BOARDS → Dashboard
 exports.getMyBoards = async (req, res) => {
   try {
     const boards = await Board.find({
       "participants.user": req.user._id,
-      isArchived: false
-    }).sort({ updatedAt: -1 });
-
+      isArchived: false,
+    });
     res.json(boards);
-
-  } catch (error) {
-    console.error("Get Boards Error:", error);
-    res.status(500).json({ message: "Server Error" });
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-
-// OPEN BOARD → Whiteboard Page
 exports.getBoardById = async (req, res) => {
   try {
     const board = await Board.findById(req.params.id);
+    if (!board) return res.status(404).json({ message: "Board not found" });
 
-    if (!board) return res.status(404).json({ message: "Not found" });
-
-    const allowed = board.participants.some(
-      p => p.user.toString() === req.user._id.toString()
-    );
-
-    if (!allowed) return res.status(403).json({ message: "Access denied" });
+    const isParticipant = board.participants.some(p => p.user.toString() === req.user._id.toString());
+    if (!isParticipant) return res.status(403).json({ message: "No Access" });
 
     res.json(board);
-
-  } catch (error) {
-    console.error("Get Board Error:", error);
-    res.status(500).json({ message: "Server Error" });
+  } catch {
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-
-// JOIN BOARD USING CODE
 exports.joinBoardByCode = async (req, res) => {
   try {
-    const { inviteCode } = req.body;
-
-    const board = await Board.findOne({ inviteCode });
+    const board = await Board.findOne({ inviteCode: req.body.inviteCode });
     if (!board) return res.status(404).json({ message: "Invalid Code" });
 
-    const already = board.participants.some(
-      p => p.user.toString() === req.user._id.toString()
-    );
+    const exists = board.participants.some(p => p.user.toString() === req.user._id.toString());
 
-    if (!already) {
+    if (!exists) {
       board.participants.push({ user: req.user._id, role: "editor" });
       await board.save();
     }
 
     res.json(board);
-
-  } catch (error) {
-    console.error("Join Error:", error);
-    res.status(500).json({ message: "Server Error" });
+  } catch {
+    res.status(500).json({ message: "Server error" });
   }
 };
 
-
-// SAVE CANVAS DATA TO DB
 exports.saveBoard = async (req, res) => {
   try {
-    const { contentJSON } = req.body;
-
     const board = await Board.findById(req.params.id);
-
-    if (!board) return res.status(404).json({ message: "Board not found" });
-
-    board.contentJSON = contentJSON;
+    board.contentJSON = req.body.contentJSON;
     await board.save();
-
-    res.json({ message: "Saved successfully" });
-
-  } catch (error) {
-    console.error("Save Error:", error);
-    res.status(500).json({ message: "Server Error" });
+    res.json({ message: "Saved" });
+  } catch {
+    res.status(500).json({ message: "Server error" });
   }
 };
