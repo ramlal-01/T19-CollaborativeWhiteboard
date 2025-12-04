@@ -33,6 +33,13 @@ const Dashboard = ({ onLogout, onOpenBoard }) => {
     { id: 3, title: 'Database Schema', date: 'Edited yesterday', thumbnail: 'bg-slate-50', icon: <Workflow className="text-slate-400" /> },
   ];
 
+  // Mock Shared Boards
+  const sharedBoards = [
+    { id: 1, title: 'Company Roadmap 2024', owner: 'John Smith', date: 'Updated 3 hours ago', thumbnail: 'bg-purple-50' },
+    { id: 2, title: 'Design System v2.0', owner: 'Sarah Johnson', date: 'Updated 2 days ago', thumbnail: 'bg-pink-50' },
+    { id: 3, title: 'Q1 Budget Planning', owner: 'Mike Chen', date: 'Updated 1 week ago', thumbnail: 'bg-orange-50' },
+  ];
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans text-slate-900">
 
@@ -281,6 +288,78 @@ const Dashboard = ({ onLogout, onOpenBoard }) => {
 
 
       </main>
+
+      {/* ===================================================
+      PART 4 — SHARED WITH ME SECTION
+======================================================= */}
+
+<section className="pb-16">
+  <div className="flex items-center gap-3 mb-6">
+    <h3 className="text-xl font-bold text-slate-800">Shared with me</h3>
+    <span className="px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 text-xs font-bold border border-purple-100">
+      {sharedBoards.length}
+    </span>
+  </div>
+
+  <div className="space-y-3">
+
+    {sharedBoards.map(board => (
+      <div 
+        key={board.id}
+        onClick={onOpenBoard}
+        className="group bg-white border border-slate-200 rounded-xl p-4 
+                   flex items-center gap-4 hover:border-purple-200 hover:shadow-md 
+                   transition-all cursor-pointer"
+      >
+
+        {/* Icon */}
+        <div className={`w-12 h-12 ${board.thumbnail} rounded-lg flex items-center 
+                        justify-center text-slate-500 group-hover:scale-105 transition-transform`}>
+          <Layout size={20} />
+        </div>
+
+        {/* Details */}
+        <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+          
+          <div className="min-w-0">
+            <h4 className="font-bold text-slate-800 truncate group-hover:text-purple-600 transition-colors">
+              {board.title}
+            </h4>
+            <p className="text-xs text-slate-400 md:hidden mt-0.5">
+              Owner: {board.owner}
+            </p>
+          </div>
+
+          {/* Owner Avatar */}
+          <div className="hidden md:flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-slate-200 text-[10px] flex items-center 
+                           justify-center font-bold text-slate-600 border border-white">
+              {board.owner.charAt(0)}
+            </div>
+            <span className="text-xs text-slate-500">{board.owner}</span>
+          </div>
+
+          {/* Last Edited */}
+          <div className="hidden md:flex items-center gap-1 text-slate-400 text-xs">
+            <Clock size={12} /> {board.date}
+          </div>
+
+        </div>
+
+        {/* Open Button */}
+        <button 
+          className="p-2 text-slate-400 hover:text-purple-600 hover:bg-purple-50 
+                     rounded-lg transition-colors"
+        >
+          <ExternalLink size={18} />
+        </button>
+
+      </div>
+    ))}
+
+  </div>
+</section>
+        
     </div>
   );
 };
