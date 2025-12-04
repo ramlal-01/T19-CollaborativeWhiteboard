@@ -286,9 +286,6 @@ const Dashboard = ({ onLogout, onOpenBoard }) => {
   </div>
 </section>
 
-
-      </main>
-
       {/* ===================================================
       PART 4 — SHARED WITH ME SECTION
 ======================================================= */}
@@ -359,7 +356,16 @@ const Dashboard = ({ onLogout, onOpenBoard }) => {
 
   </div>
 </section>
-        
+
+      {/* ===================================================
+      PART 5 — FINAL LAYOUT CLEANUP + SPACING
+======================================================= */}
+
+      {/* Extra spacing for end of page */}
+      <div className="h-10"></div>
+
+    </main>
+
     </div>
   );
 };
