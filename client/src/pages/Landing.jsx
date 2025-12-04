@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { Zap, Menu, X } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-export default function App() {
+export default function Landing() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans overflow-x-hidden">
@@ -35,7 +37,9 @@ export default function App() {
               </a>
             ))}
 
-            <button className="bg-slate-900 text-white px-5 py-2 rounded-full text-sm font-bold hover:bg-slate-800">
+            <button 
+              onClick={() => navigate('/login')}
+              className="bg-slate-900 text-white px-5 py-2 rounded-full text-sm font-bold hover:bg-slate-800">
               Launch App
             </button>
           </div>
@@ -57,7 +61,9 @@ export default function App() {
                 {item}
               </a>
             ))}
-            <button className="bg-cyan-500 text-white py-3 rounded-lg font-bold">
+            <button 
+              onClick={() => navigate('/login')}
+              className="bg-cyan-500 text-white py-3 rounded-lg font-bold">
               Launch App
             </button>
           </div>
@@ -92,7 +98,9 @@ export default function App() {
 
       {/* CTA Buttons */}
       <div className="flex flex-col sm:flex-row gap-4">
-        <button className="group bg-slate-900 hover:bg-slate-800 text-white rounded-lg px-8 py-4 flex items-center gap-2 transition-all shadow-xl hover:shadow-slate-900/20 hover:-translate-y-1">
+        <button 
+          onClick={() => navigate('/login')}
+          className="group bg-slate-900 hover:bg-slate-800 text-white rounded-lg px-8 py-4 flex items-center gap-2 transition-all shadow-xl hover:shadow-slate-900/20 hover:-translate-y-1">
           <span className="font-bold">Start Whiteboarding</span>
         </button>
 
