@@ -1,6 +1,6 @@
 const Board = require("../models/Board");
 const generateCode = require("../utils/generateCode");
-
+//better code avaibility
 exports.createBoard = async (req, res) => {
   try {
     let inviteCode = generateCode();
@@ -23,7 +23,7 @@ exports.createBoard = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
+//for participants
 exports.getMyBoards = async (req, res) => {
   try {
     const boards = await Board.find({
@@ -35,7 +35,7 @@ exports.getMyBoards = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-
+//user id to access board
 exports.getBoardById = async (req, res) => {
   try {
     const board = await Board.findById(req.params.id);
