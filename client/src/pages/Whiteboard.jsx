@@ -125,10 +125,10 @@ const Whiteboard = ({ onBack }) => {
   };
 
   return (
-    <div className="h-screen w-full flex flex-col bg-slate-50 overflow-hidden font-sans text-slate-900">
+    <div className="min-h-screen w-screen flex flex-col bg-[#F8FAFC] overflow-hidden font-sans text-slate-900">
       
       {/* 1. Top Navigation Bar */}
-      <header className="h-16 bg-white/90 backdrop-blur-md border-b border-slate-200 px-4 flex items-center justify-between z-20 shadow-sm relative">
+      <header className="h-16 bg-white/90 backdrop-blur-md border-b border-slate-200 px-4 md:px-6 flex items-center justify-between z-20 shadow-sm relative">
         
         {/* Left: Back & Title */}
         <div className="flex items-center gap-4">

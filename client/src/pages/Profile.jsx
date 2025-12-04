@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   User,
   Edit,
@@ -17,6 +18,7 @@ import {
 } from "lucide-react";
 
 const Profile = () => {
+  const navigate = useNavigate();
   // ------------ BASIC STATE ONLY (NO FIREBASE) ------------
   const [isAuthReady] = useState(true); // Always ready (no firebase)
 
@@ -116,7 +118,12 @@ const Profile = () => {
   // ==========================================
   // OTHER BUTTONS (Stub actions)
   // ==========================================
-  const handleLogout = () => showToast("Logged out (local only)", "info");
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    showToast("Logged out", "info");
+    navigate("/");
+  };
   const handleDelete = () => showToast("Delete account clicked", "error");
 
   // ==========================================
