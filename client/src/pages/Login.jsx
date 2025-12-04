@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import api from "../api";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -19,21 +19,26 @@ const Login = () => {
       return;
     }
 
-    // API call logic
     try {
-      const response = await axios.post("http://localhost:5000/api/login", {
+      const response = await api.post("/api/auth/login", {
         email,
         password,
       });
 
-      console.log("API Response: ", response.data);
+      const { token, user } = response.data;
+      if (token) {
+        localStorage.setItem("token", token);
+      }
+      if (user) {
+        localStorage.setItem("user", JSON.stringify(user));
+      }
 
-      // alert("Login Successful! (Redirect will be added in Commit 5)");
-      navigate("/profile");
-
+      navigate("/dashboard");
     } catch (error) {
-      console.log("Login Error:", error);
-      alert("Invalid credentials or server error!");
+      console.error("Login Error:", error);
+      const message =
+        error.response?.data?.message || "Invalid credentials or server error!";
+      alert(message);
     }
   };
 

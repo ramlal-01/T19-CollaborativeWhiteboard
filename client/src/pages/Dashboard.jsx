@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Zap, 
   Search, 
@@ -20,25 +20,88 @@ import {
   ExternalLink,
   Layout
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import api from '../api';
 
-const Dashboard = ({ onLogout, onOpenBoard }) => {
+const Dashboard = () => {
   const [profileOpen, setProfileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState('grid');
+  const [myBoards, setMyBoards] = useState([]);
+  const [sharedBoards, setSharedBoards] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock Boards
-  const myBoards = [
-    { id: 1, title: 'Q4 Marketing Strategy', date: 'Edited 2 mins ago', thumbnail: 'bg-indigo-50', icon: <Layout className="text-indigo-400" /> },
-    { id: 2, title: 'App UI Wireframes', date: 'Edited 1 hour ago', thumbnail: 'bg-cyan-50', icon: <Layout className="text-cyan-400" /> },
-    { id: 3, title: 'Database Schema', date: 'Edited yesterday', thumbnail: 'bg-slate-50', icon: <Workflow className="text-slate-400" /> },
-  ];
+  const navigate = useNavigate();
 
-  // Mock Shared Boards
-  const sharedBoards = [
-    { id: 1, title: 'Company Roadmap 2024', owner: 'John Smith', date: 'Updated 3 hours ago', thumbnail: 'bg-purple-50' },
-    { id: 2, title: 'Design System v2.0', owner: 'Sarah Johnson', date: 'Updated 2 days ago', thumbnail: 'bg-pink-50' },
-    { id: 3, title: 'Q1 Budget Planning', owner: 'Mike Chen', date: 'Updated 1 week ago', thumbnail: 'bg-orange-50' },
-  ];
+  useEffect(() => {
+    const storedUser = localStorage.getItem('user');
+    const token = localStorage.getItem('token');
+
+    if (!storedUser || !token) {
+      navigate('/login');
+      return;
+    }
+
+    const currentUser = JSON.parse(storedUser);
+
+    const fetchBoards = async () => {
+      try {
+        const response = await api.get('/api/boards');
+        const boards = response.data || [];
+
+        const mine = [];
+        const shared = [];
+
+        boards.forEach((board) => {
+          const isOwner = board.owner === currentUser.id;
+          if (isOwner) {
+            mine.push(board);
+          } else {
+            shared.push(board);
+          }
+        });
+
+        setMyBoards(mine);
+        setSharedBoards(shared);
+      } catch (error) {
+        console.error('Failed to load boards', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBoards();
+  }, [navigate]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
+
+  const handleOpenBoard = (boardId) => {
+    navigate(`/boards/${boardId}`);
+  };
+
+  const handleCreateBoard = async (title) => {
+    try {
+      const response = await api.post('/api/boards', { title });
+      const board = response.data;
+      setMyBoards((prev) => [board, ...prev]);
+      handleOpenBoard(board._id);
+    } catch (error) {
+      console.error('Failed to create board', error);
+      alert('Failed to create board');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] font-sans text-slate-900">
+        <p className="text-slate-600">Loading boards...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans text-slate-900">
@@ -109,7 +172,7 @@ const Dashboard = ({ onLogout, onOpenBoard }) => {
                 <div className="h-px bg-slate-100 my-2"></div>
 
                 <button 
-                  onClick={onLogout}
+                  onClick={handleLogout}
                   className="w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 rounded-lg">
                   <LogOut size={16} /> Logout
                 </button>
@@ -137,7 +200,7 @@ const Dashboard = ({ onLogout, onOpenBoard }) => {
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
 
             <div 
-              onClick={onOpenBoard}
+              onClick={() => handleCreateBoard('Untitled Board')}
               className="col-span-1 h-32 rounded-xl bg-indigo-600 hover:bg-indigo-700 
                          cursor-pointer shadow-lg flex flex-col items-center justify-center gap-3 text-white group"
             >
@@ -154,7 +217,7 @@ const Dashboard = ({ onLogout, onOpenBoard }) => {
             ].map((t) => (
               <div 
                 key={t.id}
-                onClick={onOpenBoard}
+                onClick={() => handleCreateBoard(t.name)}
                 className="col-span-1 h-32 rounded-xl bg-white border border-slate-200 
                            hover:border-indigo-300 hover:shadow-md cursor-pointer flex flex-col p-4 group"
               >
@@ -204,23 +267,30 @@ const Dashboard = ({ onLogout, onOpenBoard }) => {
 
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 
-    {myBoards.map(board => (
+    {myBoards.map((board, index) => {
+      const colors = ['bg-indigo-50', 'bg-cyan-50', 'bg-slate-50'];
+      const thumbnail = colors[index % colors.length];
+      const updated = board.updatedAt
+        ? new Date(board.updatedAt).toLocaleString()
+        : '';
+
+      return (
       <div 
-        key={board.id}
-        onClick={onOpenBoard}
+        key={board._id}
+        onClick={() => handleOpenBoard(board._id)}
         className="group bg-white rounded-2xl border border-slate-200 hover:border-indigo-200 
                    hover:shadow-xl flex flex-col overflow-hidden cursor-pointer transition-all"
       >
         
         {/* Preview Area */}
-        <div className={`h-40 ${board.thumbnail} relative p-6`}>
+        <div className={`h-40 ${thumbnail} relative p-6`}>
           
           <div className="absolute top-4 left-4 w-24 h-2 bg-white/40 rounded-full"></div>
           <div className="absolute top-8 left-4 w-16 h-2 bg-white/40 rounded-full"></div>
 
           <div className="absolute bottom-4 right-4 w-8 h-8 bg-white rounded-lg shadow-sm 
                           flex items-center justify-center">
-            {board.icon}
+            <Layout className="text-indigo-400" />
           </div>
 
           {/* Hover Overlay */}
@@ -247,7 +317,7 @@ const Dashboard = ({ onLogout, onOpenBoard }) => {
           </div>
 
           <p className="text-xs text-slate-400 mb-5 flex items-center gap-1.5">
-            <Clock size={12} /> {board.date}
+            <Clock size={12} /> {updated}
           </p>
 
           <div className="mt-auto flex items-center gap-1 border-t border-slate-50 pt-3 opacity-60 
@@ -281,7 +351,7 @@ const Dashboard = ({ onLogout, onOpenBoard }) => {
           </div>
         </div>
       </div>
-    ))}
+    )})}
 
   </div>
 </section>
@@ -300,17 +370,24 @@ const Dashboard = ({ onLogout, onOpenBoard }) => {
 
   <div className="space-y-3">
 
-    {sharedBoards.map(board => (
+    {sharedBoards.map((board, index) => {
+      const colors = ['bg-purple-50', 'bg-pink-50', 'bg-orange-50'];
+      const thumbnail = colors[index % colors.length];
+      const updated = board.updatedAt
+        ? new Date(board.updatedAt).toLocaleString()
+        : '';
+
+      return (
       <div 
-        key={board.id}
-        onClick={onOpenBoard}
+        key={board._id}
+        onClick={() => handleOpenBoard(board._id)}
         className="group bg-white border border-slate-200 rounded-xl p-4 
                    flex items-center gap-4 hover:border-purple-200 hover:shadow-md 
                    transition-all cursor-pointer"
       >
 
         {/* Icon */}
-        <div className={`w-12 h-12 ${board.thumbnail} rounded-lg flex items-center 
+        <div className={`w-12 h-12 ${thumbnail} rounded-lg flex items-center 
                         justify-center text-slate-500 group-hover:scale-105 transition-transform`}>
           <Layout size={20} />
         </div>
@@ -323,7 +400,7 @@ const Dashboard = ({ onLogout, onOpenBoard }) => {
               {board.title}
             </h4>
             <p className="text-xs text-slate-400 md:hidden mt-0.5">
-              Owner: {board.owner}
+              Owner: {board.owner?.name || 'Unknown'}
             </p>
           </div>
 
@@ -331,14 +408,14 @@ const Dashboard = ({ onLogout, onOpenBoard }) => {
           <div className="hidden md:flex items-center gap-2">
             <div className="w-6 h-6 rounded-full bg-slate-200 text-[10px] flex items-center 
                            justify-center font-bold text-slate-600 border border-white">
-              {board.owner.charAt(0)}
+              {(board.owner?.name || 'U').charAt(0)}
             </div>
-            <span className="text-xs text-slate-500">{board.owner}</span>
+            <span className="text-xs text-slate-500">{board.owner?.name || 'Unknown'}</span>
           </div>
 
           {/* Last Edited */}
           <div className="hidden md:flex items-center gap-1 text-slate-400 text-xs">
-            <Clock size={12} /> {board.date}
+            <Clock size={12} /> {updated}
           </div>
 
         </div>
@@ -352,7 +429,7 @@ const Dashboard = ({ onLogout, onOpenBoard }) => {
         </button>
 
       </div>
-    ))}
+    )})}
 
   </div>
 </section>

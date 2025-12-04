@@ -20,7 +20,8 @@ exports.register = async (req, res) => {
       user
     });
   } catch (error) {
-    res.status(500).json({ message: "Error registering user" });
+    console.error("Register error:", error);
+    res.status(500).json({ message: error.message || "Server error" });
   }
 };
 
@@ -39,8 +40,9 @@ exports.login = async (req, res) => {
       token: generateToken(user._id),
       user
     });
-  } catch (err) {
-    res.status(500).json({ message: "Login error" });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ message: error.message || "Server error" });
   }
 };
 

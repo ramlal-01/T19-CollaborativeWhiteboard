@@ -23,10 +23,71 @@ import {
   Save,
   MessageSquare
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import api from '../api';
 
 // Sliding Auth Component
 const AuthPage = ({ onBack }) => {
   const [isSignUp, setIsSignUp] = useState(false);
+  const [signUpName, setSignUpName] = useState('');
+  const [signUpEmail, setSignUpEmail] = useState('');
+  const [signUpPassword, setSignUpPassword] = useState('');
+  const [signInEmail, setSignInEmail] = useState('');
+  const [signInPassword, setSignInPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
+
+  const handleSignUp = async (e) => {
+    e.preventDefault();
+    if (!signUpName.trim() || !signUpEmail.trim() || !signUpPassword.trim()) {
+      alert('All fields are required');
+      return;
+    }
+    try {
+      setLoading(true);
+      const response = await api.post('/api/auth/register', {
+        name: signUpName,
+        email: signUpEmail,
+        password: signUpPassword,
+      });
+      const { token, user } = response.data;
+      if (token) localStorage.setItem('token', token);
+      if (user) localStorage.setItem('user', JSON.stringify(user));
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Sign up error:', error);
+      const message = error.response?.data?.message || 'Registration failed';
+      alert(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSignIn = async (e) => {
+    e.preventDefault();
+    if (!signInEmail.trim() || !signInPassword.trim()) {
+      alert('Email and password are required');
+      return;
+    }
+    try {
+      setLoading(true);
+      const response = await api.post('/api/auth/login', {
+        email: signInEmail,
+        password: signInPassword,
+      });
+      const { token, user } = response.data;
+      if (token) localStorage.setItem('token', token);
+      if (user) localStorage.setItem('user', JSON.stringify(user));
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Sign in error:', error);
+      const message = error.response?.data?.message || 'Login failed';
+      alert(message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 relative overflow-hidden font-sans">
@@ -46,7 +107,7 @@ const AuthPage = ({ onBack }) => {
         
         {/* Sign Up Form Container */}
         <div className={`absolute top-0 h-full w-1/2 left-0 transition-all duration-700 ease-in-out flex flex-col items-center justify-center p-12 bg-white ${isSignUp ? 'translate-x-[100%] opacity-100 z-50' : 'opacity-0 z-10'}`}>
-          <form className="w-full flex flex-col items-center" onSubmit={(e) => e.preventDefault()}>
+          <form className="w-full flex flex-col items-center" onSubmit={handleSignUp}>
             <h1 className="text-3xl font-bold mb-6 text-slate-800">Join the Session</h1>
             
             <div className="flex gap-4 mb-6">
@@ -68,6 +129,8 @@ const AuthPage = ({ onBack }) => {
                 <input 
                   type="text" 
                   placeholder="Full Name" 
+                  value={signUpName}
+                  onChange={(e) => setSignUpName(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all text-sm text-slate-700 placeholder-slate-400" 
                 />
               </div>
@@ -78,6 +141,8 @@ const AuthPage = ({ onBack }) => {
                 <input 
                   type="email" 
                   placeholder="Email Address" 
+                  value={signUpEmail}
+                  onChange={(e) => setSignUpEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all text-sm text-slate-700 placeholder-slate-400" 
                 />
               </div>
@@ -88,20 +153,25 @@ const AuthPage = ({ onBack }) => {
                 <input 
                   type="password" 
                   placeholder="Password" 
+                  value={signUpPassword}
+                  onChange={(e) => setSignUpPassword(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all text-sm text-slate-700 placeholder-slate-400" 
                 />
               </div>
             </div>
 
-            <button className="bg-cyan-500 text-white px-12 py-3.5 rounded-lg font-bold uppercase tracking-wider text-xs hover:bg-cyan-600 hover:shadow-lg hover:shadow-cyan-500/30 transition-all transform hover:-translate-y-0.5 active:translate-y-0">
-              Sign Up
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-cyan-500 text-white px-12 py-3.5 rounded-lg font-bold uppercase tracking-wider text-xs hover:bg-cyan-600 hover:shadow-lg hover:shadow-cyan-500/30 transition-all transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed">
+              {loading ? 'Signing up...' : 'Sign Up'}
             </button>
           </form>
         </div>
 
         {/* Sign In Form Container */}
         <div className={`absolute top-0 h-full w-1/2 left-0 transition-all duration-700 ease-in-out flex flex-col items-center justify-center p-12 bg-white z-20 ${isSignUp ? 'translate-x-[100%]' : ''}`}>
-          <form className="w-full flex flex-col items-center" onSubmit={(e) => e.preventDefault()}>
+          <form className="w-full flex flex-col items-center" onSubmit={handleSignIn}>
             <h1 className="text-3xl font-bold mb-6 text-slate-800">Welcome Back</h1>
             
             <div className="flex gap-4 mb-6">
@@ -123,6 +193,8 @@ const AuthPage = ({ onBack }) => {
                 <input 
                   type="email" 
                   placeholder="Email Address" 
+                  value={signInEmail}
+                  onChange={(e) => setSignInEmail(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all text-sm text-slate-700 placeholder-slate-400" 
                 />
               </div>
@@ -133,6 +205,8 @@ const AuthPage = ({ onBack }) => {
                 <input 
                   type="password" 
                   placeholder="Password" 
+                  value={signInPassword}
+                  onChange={(e) => setSignInPassword(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all text-sm text-slate-700 placeholder-slate-400" 
                 />
               </div>
@@ -140,8 +214,11 @@ const AuthPage = ({ onBack }) => {
 
             <a href="#" className="text-xs font-semibold text-slate-500 mb-8 hover:text-cyan-600 hover:underline transition-colors">Forgot your password?</a>
 
-            <button className="bg-cyan-500 text-white px-12 py-3.5 rounded-lg font-bold uppercase tracking-wider text-xs hover:bg-cyan-600 hover:shadow-lg hover:shadow-cyan-500/30 transition-all transform hover:-translate-y-0.5 active:translate-y-0">
-              Sign In
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-cyan-500 text-white px-12 py-3.5 rounded-lg font-bold uppercase tracking-wider text-xs hover:bg-cyan-600 hover:shadow-lg hover:shadow-cyan-500/30 transition-all transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed">
+              {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
         </div>

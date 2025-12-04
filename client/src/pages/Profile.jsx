@@ -17,10 +17,8 @@ import {
 } from "lucide-react";
 
 const Profile = () => {
-  // ==========================================
-  // BASIC LOCAL STATE (NO FIREBASE)
-  // ==========================================
-  const [profileLoading, setProfileLoading] = useState(false);
+  // ------------ BASIC STATE ONLY (NO FIREBASE) ------------
+  const [isAuthReady] = useState(true); // Always ready (no firebase)
 
   // 🎯 NEW: load from localStorage if available
   const [displayName, setDisplayName] = useState("Guest User");
@@ -74,13 +72,7 @@ const Profile = () => {
   // SAVE PROFILE LOCALLY
   // ==========================================
   const handleProfileSave = () => {
-    setProfileLoading(true);
-    setTimeout(() => {
-      setProfileLoading(false);
-      // 🔄 NEW: persist display name to localStorage
-      localStorage.setItem("cw_profile_name", displayName);
-      showToast("Profile updated successfully!");
-    }, 900);
+    alert("Profile updated (local only, no backend)");
   };
 
   // ==========================================
