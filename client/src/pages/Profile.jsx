@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   User,
   Edit,
@@ -10,79 +10,160 @@ import {
   Clipboard,
   LayoutGrid,
   Clock,
-  Loader2
+  Loader2,
+  Eye,
+  EyeOff,
+  AlertTriangle
 } from "lucide-react";
 
 const Profile = () => {
   // ------------ BASIC STATE ONLY (NO FIREBASE) ------------
   const [isAuthReady] = useState(true); // Always ready (no firebase)
 
+  // 🎯 NEW: load from localStorage if available
   const [displayName, setDisplayName] = useState("Guest User");
   const [profileEmail] = useState("guest@example.com");
   const [avatarUrl, setAvatarUrl] = useState(
     "https://placehold.co/100x100/A5B4FC/ffffff?text=U"
   );
 
-  const userId = "LOCAL-USER-12345"; // Mock userId (no firebase)
+  const userId = "LOCAL-USER-12345";
 
-  // ------------ STUB ACTIONS (NO BACKEND YET) ------------
+  // 🔄 Load saved profile from localStorage on mount
+  useEffect(() => {
+    const savedName = localStorage.getItem("cw_profile_name");
+    const savedAvatar = localStorage.getItem("cw_profile_avatar");
+
+    if (savedName) {
+      setDisplayName(savedName);
+    }
+    if (savedAvatar) {
+      setAvatarUrl(savedAvatar);
+    }
+  }, []);
+
+  // ==========================================
+  // TOAST NOTIFICATION
+  // ==========================================
+  const [toast, setToast] = useState(null);
+  const showToast = (msg, type = "success") => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  // ==========================================
+  // AVATAR UPLOAD
+  // ==========================================
+  const handleAvatarUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return showToast("No file selected", "error");
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setAvatarUrl(reader.result);
+      // 🔄 NEW: save avatar preview locally
+      localStorage.setItem("cw_profile_avatar", reader.result);
+    };
+    reader.readAsDataURL(file);
+    showToast("Avatar updated (preview only)");
+  };
+
+  // ==========================================
+  // SAVE PROFILE LOCALLY
+  // ==========================================
   const handleProfileSave = () => {
     alert("Profile updated (local only, no backend)");
   };
 
-  const handlePasswordSave = () => {
-    alert("Password change clicked (logic will be added later)");
+  // ==========================================
+  // CHANGE PASSWORD FUNCTIONALITY
+  // ==========================================
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [passwordLoading, setPasswordLoading] = useState(false);
+
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirmNew, setShowConfirmNew] = useState(false);
+
+  const handlePasswordChange = () => {
+    if (!currentPassword.trim()) {
+      return showToast("Please enter current password", "error");
+    }
+
+    if (newPassword.length < 6) {
+      return showToast("New password must be at least 6 characters", "error");
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      return showToast("New passwords do not match", "error");
+    }
+
+    setPasswordLoading(true);
+
+    setTimeout(() => {
+      setPasswordLoading(false);
+
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmNewPassword("");
+
+      showToast("Password changed successfully!");
+    }, 1200);
   };
 
-  const handleLogout = () => {
-    alert("Logout clicked (no auth yet)");
-  };
+  // ==========================================
+  // OTHER BUTTONS (Stub actions)
+  // ==========================================
+  const handleLogout = () => showToast("Logged out (local only)", "info");
+  const handleDelete = () => showToast("Delete account clicked", "error");
 
-  const handleDelete = () => {
-    alert("Delete account clicked (no backend)");
-  };
-
-  const handleAvatarUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => setAvatarUrl(reader.result);
-    reader.readAsDataURL(file);
-  };
-
-  // ------------ LOADING SCREEN (STATIC) ------------
-  if (!isAuthReady) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-        <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
-        <p className="mt-4 text-gray-600">Loading Profile...</p>
-      </div>
-    );
-  }
-
-  // ---------------------------------------------------------
-  //                  PROFILE PAGE UI (NO FIREBASE)
-  // ---------------------------------------------------------
+  // ==========================================
+  // RENDER PAGE
+  // ==========================================
   return (
-    <div className="min-h-screen bg-gray-50 p-6 md:p-10 font-inter">
-      <div className="w-full max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gray-50 p-6 md:p-10 font-inter relative">
+      {/* 🔥 TOAST NOTIFICATION */}
+      {toast && (
+        <div
+          className={`fixed top-4 right-4 px-5 py-3 rounded-lg shadow-xl text-white z-50 flex items-center space-x-3
+            ${toast.type === "success" ? "bg-green-600" : ""}
+            ${toast.type === "error" ? "bg-red-600" : ""}
+            ${toast.type === "info" ? "bg-blue-600" : ""}
+          `}
+        >
+          {toast.type === "error" && <AlertTriangle className="w-5 h-5" />}
+          <span>{toast.msg}</span>
+        </div>
+      )}
 
-        {/* Header */}
+      <div className="w-full max-w-6xl mx-auto">
+        {/* HEADER */}
         <div className="flex items-center justify-between border-b pb-4 mb-8">
-          <h1 className="text-3xl font-extrabold flex items-center text-gray-800">
-            <User className="mr-3 text-indigo-600" /> User Profile & Settings
-          </h1>
-          <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg shadow-md">
+          <div>
+            <h1 className="text-3xl font-extrabold flex items-center text-gray-800">
+              <User className="mr-3 text-indigo-600" />
+              User Profile & Settings
+            </h1>
+            {/* NEW: subtle subtitle */}
+            <p className="text-sm text-gray-500 mt-1">
+              Manage your local profile details and security preferences.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg shadow-md"
+          >
             Dashboard
           </button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-
           {/* LEFT SECTION */}
           <div className="lg:col-span-8 space-y-8">
-
-            {/* PERSONAL INFO */}
+            {/* PERSONAL DETAILS */}
             <div className="bg-white p-6 rounded-2xl shadow-xl">
               <h2 className="text-2xl font-bold border-b pb-3 mb-6 flex items-center text-gray-800">
                 <Edit className="mr-2 text-indigo-600" /> Personal Details
@@ -90,12 +171,25 @@ const Profile = () => {
 
               {/* Avatar */}
               <div className="flex items-center space-x-6 pb-6 border-b">
-                <div className="relative w-28 h-28 rounded-full overflow-hidden border-4 border-indigo-300">
-                  <img src={avatarUrl} alt="Avatar" />
-                  <label className="absolute inset-0 bg-black bg-opacity-40 text-white 
-                    flex items-center justify-center opacity-0 hover:opacity-100 cursor-pointer">
-                    <Camera className="w-6 h-6" />
-                    <input type="file" className="hidden" onChange={handleAvatarUpload}/>
+                <div className="relative w-28 h-28 rounded-full overflow-hidden border-4 border-indigo-300 shadow-lg group">
+                  <img
+                    src={avatarUrl}
+                    alt={`Avatar of ${displayName}`}
+                    className="object-cover w-full h-full"
+                  />
+
+                  <label
+                    className="absolute inset-0 bg-black bg-opacity-40 text-white flex flex-col
+                    items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition"
+                  >
+                    <Camera className="w-6 h-6 mb-1" />
+                    <span className="text-sm">Upload</span>
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleAvatarUpload}
+                    />
                   </label>
                 </div>
 
@@ -106,7 +200,7 @@ const Profile = () => {
                 </div>
               </div>
 
-              {/* Name Input */}
+              {/* Username Input */}
               <div className="mt-6">
                 <label className="block text-gray-700 mb-1">
                   Username / Display Name
@@ -120,10 +214,17 @@ const Profile = () => {
               </div>
 
               <button
+                type="button"
                 onClick={handleProfileSave}
-                className="mt-6 px-6 py-2 rounded-lg bg-indigo-600 text-white shadow-md flex items-center"
+                disabled={profileLoading}
+                className="mt-6 px-6 py-2 rounded-lg bg-indigo-600 text-white shadow-md flex items-center disabled:opacity-70"
               >
-                <Save className="mr-2" /> Save Changes
+                {profileLoading ? (
+                  <Loader2 className="mr-2 w-5 h-5 animate-spin" />
+                ) : (
+                  <Save className="mr-2" />
+                )}
+                {profileLoading ? "Saving..." : "Save Changes"}
               </button>
             </div>
 
@@ -134,28 +235,86 @@ const Profile = () => {
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <input type="password" placeholder="Current Password" className="border px-3 py-2 rounded-lg"/>
-                <input type="password" placeholder="New Password" className="border px-3 py-2 rounded-lg"/>
-                <input type="password" placeholder="Confirm Password" className="border px-3 py-2 rounded-lg"/>
+                {/* CURRENT PASSWORD */}
+                <div className="relative">
+                  <input
+                    type={showCurrent ? "text" : "password"}
+                    placeholder="Current Password"
+                    className="border px-3 py-2 rounded-lg w-full"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrent(!showCurrent)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
+                  >
+                    {showCurrent ? <EyeOff /> : <Eye />}
+                  </button>
+                </div>
+
+                {/* NEW PASSWORD */}
+                <div className="relative">
+                  <input
+                    type={showNew ? "text" : "password"}
+                    placeholder="New Password"
+                    className="border px-3 py-2 rounded-lg w-full"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNew(!showNew)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
+                  >
+                    {showNew ? <EyeOff /> : <Eye />}
+                  </button>
+                </div>
+
+                {/* CONFIRM NEW PASSWORD */}
+                <div className="relative">
+                  <input
+                    type={showConfirmNew ? "text" : "password"}
+                    placeholder="Confirm Password"
+                    className="border px-3 py-2 rounded-lg w-full"
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmNew(!showConfirmNew)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
+                  >
+                    {showConfirmNew ? <EyeOff /> : <Eye />}
+                  </button>
+                </div>
               </div>
 
+              {/* SAVE PASSWORD BUTTON */}
               <button
-                onClick={handlePasswordSave}
-                className="mt-6 px-6 py-2 rounded-lg bg-indigo-600 text-white shadow-md"
+                type="button"
+                onClick={handlePasswordChange}
+                disabled={passwordLoading}
+                className="mt-6 px-6 py-2 rounded-lg bg-indigo-600 text-white shadow-md flex items-center disabled:opacity-70"
               >
-                Change Password
+                {passwordLoading ? (
+                  <Loader2 className="mr-2 w-5 h-5 animate-spin" />
+                ) : (
+                  <Key className="mr-2" />
+                )}
+                {passwordLoading ? "Updating..." : "Change Password"}
               </button>
             </div>
           </div>
 
           {/* RIGHT SECTION */}
           <div className="lg:col-span-4 space-y-8">
-
-            {/* STATS */}
+            {/* STATS SECTION */}
             <div className="bg-white p-6 rounded-2xl shadow-xl">
               <h2 className="text-2xl font-bold border-b pb-3 mb-6 flex items-center text-gray-800">
                 <Clipboard className="mr-2 text-indigo-600" /> Activity Stats
               </h2>
+
               <div className="p-4 bg-indigo-50 rounded-xl text-center shadow-md">
                 <LayoutGrid className="mx-auto text-indigo-600 mb-2" />
                 <span className="text-3xl font-bold text-indigo-800">0</span>
@@ -176,6 +335,7 @@ const Profile = () => {
               </h2>
 
               <button
+                type="button"
                 onClick={handleLogout}
                 className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg shadow mb-4"
               >
@@ -183,6 +343,7 @@ const Profile = () => {
               </button>
 
               <button
+                type="button"
                 onClick={handleDelete}
                 className="w-full px-4 py-2 bg-red-600 text-white rounded-lg shadow"
               >
@@ -190,7 +351,6 @@ const Profile = () => {
               </button>
             </div>
           </div>
-
         </div>
       </div>
     </div>
