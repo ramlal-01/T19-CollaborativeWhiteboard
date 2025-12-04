@@ -17,7 +17,9 @@ import {
 } from "lucide-react";
 
 const Profile = () => {
-  // ------------ BASIC LOCAL STATES ------------
+  // ==========================================
+  // BASIC LOCAL STATE (NO FIREBASE)
+  // ==========================================
   const [profileLoading, setProfileLoading] = useState(false);
 
   const [displayName, setDisplayName] = useState("Guest User");
@@ -28,14 +30,18 @@ const Profile = () => {
 
   const userId = "LOCAL-USER-12345";
 
-  // ------------ TOAST NOTIFICATION ------------
+  // ==========================================
+  // TOAST NOTIFICATION
+  // ==========================================
   const [toast, setToast] = useState(null);
   const showToast = (msg, type = "success") => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
   };
 
-  // ------------ AVATAR UPLOAD ------------
+  // ==========================================
+  // AVATAR UPLOAD
+  // ==========================================
   const handleAvatarUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return showToast("No file selected", "error");
@@ -46,7 +52,9 @@ const Profile = () => {
     showToast("Avatar updated (preview only)");
   };
 
-  // ------------ SAVE PROFILE (LOCAL ONLY) ------------
+  // ==========================================
+  // SAVE PROFILE LOCALLY
+  // ==========================================
   const handleProfileSave = () => {
     setProfileLoading(true);
     setTimeout(() => {
@@ -55,22 +63,19 @@ const Profile = () => {
     }, 900);
   };
 
-  // -------------------------------------------------
-  // 🌟 COMMIT 4: CHANGE PASSWORD FUNCTIONALITY
-  // -------------------------------------------------
-
+  // ==========================================
+  // CHANGE PASSWORD FUNCTIONALITY
+  // ==========================================
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [passwordLoading, setPasswordLoading] = useState(false);
 
-  // Show/Hide toggles
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirmNew, setShowConfirmNew] = useState(false);
 
   const handlePasswordChange = () => {
-    // 🌟 Validations
     if (!currentPassword.trim()) {
       return showToast("Please enter current password", "error");
     }
@@ -83,12 +88,11 @@ const Profile = () => {
       return showToast("New passwords do not match", "error");
     }
 
-    // 🌟 Mock API process
     setPasswordLoading(true);
+
     setTimeout(() => {
       setPasswordLoading(false);
 
-      // Reset fields
       setCurrentPassword("");
       setNewPassword("");
       setConfirmNewPassword("");
@@ -97,17 +101,22 @@ const Profile = () => {
     }, 1200);
   };
 
-  // ------------ OTHER BUTTONS (Stub actions) ------------
+  // ==========================================
+  // OTHER BUTTONS (Stub actions)
+  // ==========================================
   const handleLogout = () => showToast("Logged out (local only)", "info");
   const handleDelete = () => showToast("Delete account clicked", "error");
 
+  // ==========================================
+  // RENDER PAGE
+  // ==========================================
   return (
     <div className="min-h-screen bg-gray-50 p-6 md:p-10 font-inter relative">
 
       {/* 🔥 TOAST NOTIFICATION */}
       {toast && (
         <div
-          className={`fixed top-4 right-4 px-5 py-3 rounded-lg shadow-xl text-white z-50 flex items-center space-x-3 animate-fadeIn 
+          className={`fixed top-4 right-4 px-5 py-3 rounded-lg shadow-xl text-white z-50 flex items-center space-x-3 
             ${toast.type === "success" ? "bg-green-600" : ""}
             ${toast.type === "error" ? "bg-red-600" : ""}
             ${toast.type === "info" ? "bg-blue-600" : ""}
@@ -120,11 +129,13 @@ const Profile = () => {
 
       <div className="w-full max-w-6xl mx-auto">
 
-        {/* Header */}
+        {/* HEADER */}
         <div className="flex items-center justify-between border-b pb-4 mb-8">
           <h1 className="text-3xl font-extrabold flex items-center text-gray-800">
-            <User className="mr-3 text-indigo-600" /> User Profile & Settings
+            <User className="mr-3 text-indigo-600" />
+            User Profile & Settings
           </h1>
+
           <button className="px-4 py-2 bg-indigo-600 text-white rounded-lg shadow-md">
             Dashboard
           </button>
@@ -135,9 +146,7 @@ const Profile = () => {
           {/* LEFT SECTION */}
           <div className="lg:col-span-8 space-y-8">
 
-            {/* ------------------------ */}
-            {/* PROFILE DETAILS */}
-            {/* ------------------------ */}
+            {/* PERSONAL DETAILS */}
             <div className="bg-white p-6 rounded-2xl shadow-xl">
               <h2 className="text-2xl font-bold border-b pb-3 mb-6 flex items-center text-gray-800">
                 <Edit className="mr-2 text-indigo-600" /> Personal Details
@@ -149,8 +158,8 @@ const Profile = () => {
                   <img src={avatarUrl} alt="Avatar" className="object-cover w-full h-full" />
 
                   <label
-                    className="absolute inset-0 bg-black bg-opacity-40 text-white flex flex-col items-center justify-center 
-                    opacity-0 group-hover:opacity-100 cursor-pointer transition"
+                    className="absolute inset-0 bg-black bg-opacity-40 text-white flex flex-col 
+                    items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition"
                   >
                     <Camera className="w-6 h-6 mb-1" />
                     <span className="text-sm">Upload</span>
@@ -165,7 +174,7 @@ const Profile = () => {
                 </div>
               </div>
 
-              {/* Name Input */}
+              {/* Username Input */}
               <div className="mt-6">
                 <label className="block text-gray-700 mb-1">Username / Display Name</label>
                 <input
@@ -190,9 +199,7 @@ const Profile = () => {
               </button>
             </div>
 
-            {/* ------------------------ */}
-            {/* CHANGE PASSWORD SECTION */}
-            {/* ------------------------ */}
+            {/* CHANGE PASSWORD */}
             <div className="bg-white p-6 rounded-2xl shadow-xl">
               <h2 className="text-2xl font-bold border-b pb-3 mb-6 flex items-center text-gray-800">
                 <Key className="mr-2 text-indigo-600" /> Change Password
@@ -211,7 +218,7 @@ const Profile = () => {
                   />
                   <button
                     onClick={() => setShowCurrent(!showCurrent)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
                   >
                     {showCurrent ? <EyeOff /> : <Eye />}
                   </button>
@@ -228,7 +235,7 @@ const Profile = () => {
                   />
                   <button
                     onClick={() => setShowNew(!showNew)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
                   >
                     {showNew ? <EyeOff /> : <Eye />}
                   </button>
@@ -245,14 +252,14 @@ const Profile = () => {
                   />
                   <button
                     onClick={() => setShowConfirmNew(!showConfirmNew)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600"
                   >
                     {showConfirmNew ? <EyeOff /> : <Eye />}
                   </button>
                 </div>
               </div>
 
-              {/* SAVE BUTTON */}
+              {/* SAVE PASSWORD BUTTON */}
               <button
                 onClick={handlePasswordChange}
                 disabled={passwordLoading}
@@ -266,12 +273,13 @@ const Profile = () => {
                 {passwordLoading ? "Updating..." : "Change Password"}
               </button>
             </div>
+
           </div>
 
           {/* RIGHT SECTION */}
           <div className="lg:col-span-4 space-y-8">
 
-            {/* STATS */}
+            {/* STATS SECTION */}
             <div className="bg-white p-6 rounded-2xl shadow-xl">
               <h2 className="text-2xl font-bold border-b pb-3 mb-6 flex items-center text-gray-800">
                 <Clipboard className="mr-2 text-indigo-600" /> Activity Stats
@@ -310,6 +318,7 @@ const Profile = () => {
                 <Trash2 className="mr-2 inline" /> Delete Account
               </button>
             </div>
+
           </div>
 
         </div>
