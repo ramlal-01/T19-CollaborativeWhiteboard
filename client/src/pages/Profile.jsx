@@ -11,12 +11,13 @@ import {
   LayoutGrid,
   Clock,
   Loader2,
-  AlertTriangle,
-  X
+  Eye,
+  EyeOff,
+  AlertTriangle
 } from "lucide-react";
 
 const Profile = () => {
-  // ------------ BASIC LOCAL STATE (NO FIREBASE) ------------
+  // ------------ BASIC LOCAL STATES ------------
   const [profileLoading, setProfileLoading] = useState(false);
 
   const [displayName, setDisplayName] = useState("Guest User");
@@ -25,12 +26,12 @@ const Profile = () => {
     "https://placehold.co/100x100/A5B4FC/ffffff?text=U"
   );
 
-  const [toast, setToast] = useState(null);
   const userId = "LOCAL-USER-12345";
 
   // ------------ TOAST NOTIFICATION ------------
-  const showToast = (text, type = "success") => {
-    setToast({ text, type });
+  const [toast, setToast] = useState(null);
+  const showToast = (msg, type = "success") => {
+    setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
   };
 
@@ -42,24 +43,63 @@ const Profile = () => {
     const reader = new FileReader();
     reader.onloadend = () => setAvatarUrl(reader.result);
     reader.readAsDataURL(file);
-
     showToast("Avatar updated (preview only)");
   };
 
-  // ------------ SAVE PROFILE (LOCAL) ------------
+  // ------------ SAVE PROFILE (LOCAL ONLY) ------------
   const handleProfileSave = () => {
     setProfileLoading(true);
-
     setTimeout(() => {
       setProfileLoading(false);
       showToast("Profile updated successfully!");
-    }, 800);
+    }, 900);
   };
 
-  // ------------ OTHER BUTTONS (STUBS) ------------
-  const handlePasswordSave = () => showToast("Password change clicked");
-  const handleLogout = () => showToast("Logout clicked", "info");
-  const handleDelete = () => showToast("Delete Account clicked", "error");
+  // -------------------------------------------------
+  // 🌟 COMMIT 4: CHANGE PASSWORD FUNCTIONALITY
+  // -------------------------------------------------
+
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [passwordLoading, setPasswordLoading] = useState(false);
+
+  // Show/Hide toggles
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirmNew, setShowConfirmNew] = useState(false);
+
+  const handlePasswordChange = () => {
+    // 🌟 Validations
+    if (!currentPassword.trim()) {
+      return showToast("Please enter current password", "error");
+    }
+
+    if (newPassword.length < 6) {
+      return showToast("New password must be at least 6 characters", "error");
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      return showToast("New passwords do not match", "error");
+    }
+
+    // 🌟 Mock API process
+    setPasswordLoading(true);
+    setTimeout(() => {
+      setPasswordLoading(false);
+
+      // Reset fields
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmNewPassword("");
+
+      showToast("Password changed successfully!");
+    }, 1200);
+  };
+
+  // ------------ OTHER BUTTONS (Stub actions) ------------
+  const handleLogout = () => showToast("Logged out (local only)", "info");
+  const handleDelete = () => showToast("Delete account clicked", "error");
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 md:p-10 font-inter relative">
@@ -74,7 +114,7 @@ const Profile = () => {
           `}
         >
           {toast.type === "error" && <AlertTriangle className="w-5 h-5" />}
-          <span>{toast.text}</span>
+          <span>{toast.msg}</span>
         </div>
       )}
 
@@ -95,7 +135,9 @@ const Profile = () => {
           {/* LEFT SECTION */}
           <div className="lg:col-span-8 space-y-8">
 
-            {/* PERSONAL INFO */}
+            {/* ------------------------ */}
+            {/* PROFILE DETAILS */}
+            {/* ------------------------ */}
             <div className="bg-white p-6 rounded-2xl shadow-xl">
               <h2 className="text-2xl font-bold border-b pb-3 mb-6 flex items-center text-gray-800">
                 <Edit className="mr-2 text-indigo-600" /> Personal Details
@@ -136,8 +178,8 @@ const Profile = () => {
 
               <button
                 onClick={handleProfileSave}
-                className="mt-6 px-6 py-2 rounded-lg bg-indigo-600 text-white shadow-md flex items-center"
                 disabled={profileLoading}
+                className="mt-6 px-6 py-2 rounded-lg bg-indigo-600 text-white shadow-md flex items-center"
               >
                 {profileLoading ? (
                   <Loader2 className="mr-2 w-5 h-5 animate-spin" />
@@ -148,23 +190,80 @@ const Profile = () => {
               </button>
             </div>
 
-            {/* CHANGE PASSWORD */}
+            {/* ------------------------ */}
+            {/* CHANGE PASSWORD SECTION */}
+            {/* ------------------------ */}
             <div className="bg-white p-6 rounded-2xl shadow-xl">
               <h2 className="text-2xl font-bold border-b pb-3 mb-6 flex items-center text-gray-800">
                 <Key className="mr-2 text-indigo-600" /> Change Password
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <input type="password" placeholder="Current Password" className="border px-3 py-2 rounded-lg" />
-                <input type="password" placeholder="New Password" className="border px-3 py-2 rounded-lg" />
-                <input type="password" placeholder="Confirm Password" className="border px-3 py-2 rounded-lg" />
+
+                {/* CURRENT PASSWORD */}
+                <div className="relative">
+                  <input
+                    type={showCurrent ? "text" : "password"}
+                    placeholder="Current Password"
+                    className="border px-3 py-2 rounded-lg w-full"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                  />
+                  <button
+                    onClick={() => setShowCurrent(!showCurrent)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  >
+                    {showCurrent ? <EyeOff /> : <Eye />}
+                  </button>
+                </div>
+
+                {/* NEW PASSWORD */}
+                <div className="relative">
+                  <input
+                    type={showNew ? "text" : "password"}
+                    placeholder="New Password"
+                    className="border px-3 py-2 rounded-lg w-full"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  />
+                  <button
+                    onClick={() => setShowNew(!showNew)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  >
+                    {showNew ? <EyeOff /> : <Eye />}
+                  </button>
+                </div>
+
+                {/* CONFIRM NEW PASSWORD */}
+                <div className="relative">
+                  <input
+                    type={showConfirmNew ? "text" : "password"}
+                    placeholder="Confirm Password"
+                    className="border px-3 py-2 rounded-lg w-full"
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                  />
+                  <button
+                    onClick={() => setShowConfirmNew(!showConfirmNew)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+                  >
+                    {showConfirmNew ? <EyeOff /> : <Eye />}
+                  </button>
+                </div>
               </div>
 
+              {/* SAVE BUTTON */}
               <button
-                onClick={handlePasswordSave}
-                className="mt-6 px-6 py-2 rounded-lg bg-indigo-600 text-white shadow-md"
+                onClick={handlePasswordChange}
+                disabled={passwordLoading}
+                className="mt-6 px-6 py-2 rounded-lg bg-indigo-600 text-white shadow-md flex items-center"
               >
-                Change Password
+                {passwordLoading ? (
+                  <Loader2 className="mr-2 w-5 h-5 animate-spin" />
+                ) : (
+                  <Key className="mr-2" />
+                )}
+                {passwordLoading ? "Updating..." : "Change Password"}
               </button>
             </div>
           </div>
