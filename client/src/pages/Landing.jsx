@@ -136,6 +136,94 @@ export default function App() {
 </main>
 
 
+{/* Bento Grid Features */}
+<section className="py-24 px-6 relative z-10 bg-white" id="product">
+  <div className="max-w-7xl mx-auto">
+
+    {/* Title */}
+    <h2 className="text-4xl font-bold mb-16 text-center text-slate-900">
+      Built for <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 to-blue-600">velocity</span>.
+    </h2>
+
+    {/* Grid */}
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[300px]">
+
+      {/* Card 1 - Realtime WebSocket */}
+      <div className="md:col-span-2 bg-slate-50 border border-slate-200 rounded-3xl p-8 hover:bg-white hover:shadow-xl hover:shadow-cyan-500/5 transition-all group relative overflow-hidden">
+        
+        <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity text-slate-900">
+          <Zap size={120} />
+        </div>
+
+        <div className="relative z-10 h-full flex flex-col justify-end">
+          <h3 className="text-3xl font-bold mb-2 text-slate-900">Real-time WebSocket Sync</h3>
+          <p className="text-slate-600">
+            Updates propagate across all connected clients in under 30ms. No refreshing, no waiting.
+          </p>
+        </div>
+      </div>
+
+      {/* Card 2 - Infinite Canvas */}
+      <div className="bg-slate-50 border border-slate-200 rounded-3xl p-8 hover:bg-white hover:shadow-xl hover:shadow-purple-500/5 transition-all flex flex-col justify-between group">
+        <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform">
+          <svg width="24" height="24" strokeWidth="2" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+          </svg>
+        </div>
+        <div>
+          <h3 className="text-xl font-bold mb-2 text-slate-900">Infinite Canvas</h3>
+          <p className="text-slate-600 text-sm">
+            Pan, zoom, and expand without limits. Crisp vector rendering at any scale.
+          </p>
+        </div>
+      </div>
+
+      {/* Card 3 - Role Based Security */}
+      <div className="bg-slate-50 border border-slate-200 rounded-3xl p-8 hover:bg-white hover:shadow-xl hover:shadow-blue-500/5 transition-all flex flex-col justify-between group">
+        <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
+          <svg width="24" height="24" strokeWidth="2" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 17v.01"/>
+            <path d="M10 7h4a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z"/>
+          </svg>
+        </div>
+        <div>
+          <h3 className="text-xl font-bold mb-2 text-slate-900">Role-Based Access</h3>
+          <p className="text-slate-600 text-sm">
+            Controls for Admins, Editors, Texters, and Viewers. Secure token system.
+          </p>
+        </div>
+      </div>
+
+      {/* Card 4 - Stack Architecture */}
+      <div className="md:col-span-2 bg-gradient-to-br from-slate-900 to-slate-800 border border-slate-800 rounded-3xl p-8 flex items-center relative overflow-hidden text-white">
+        
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+
+        <div className="relative z-10 w-full">
+          <h3 className="text-2xl font-bold mb-6">The Stack</h3>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              "React 18",
+              "Node.js",
+              "Redis",
+              "PostgreSQL"
+            ].map((tech) => (
+              <div
+                key={tech}
+                className="flex flex-col items-center gap-3 p-4 bg-white/10 rounded-xl border border-white/5 hover:border-cyan-400/50 transition-colors backdrop-blur-sm">
+                <span className="font-mono text-sm text-slate-200">{tech}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
     </div>
   );
 }
