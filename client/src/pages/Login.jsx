@@ -1,10 +1,13 @@
 import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     // Basic validation
     if (!email.trim()) {
       alert("Email is required!");
@@ -16,7 +19,22 @@ const Login = () => {
       return;
     }
 
-    alert("Validation passed! (API will be added next)");
+    // API call logic
+    try {
+      const response = await axios.post("http://localhost:5000/api/login", {
+        email,
+        password,
+      });
+
+      console.log("API Response: ", response.data);
+
+      // alert("Login Successful! (Redirect will be added in Commit 5)");
+      navigate("/profile");
+
+    } catch (error) {
+      console.log("Login Error:", error);
+      alert("Invalid credentials or server error!");
+    }
   };
 
   return (
