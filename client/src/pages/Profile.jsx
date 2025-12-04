@@ -10,66 +10,74 @@ import {
   Clipboard,
   LayoutGrid,
   Clock,
-  Loader2
+  Loader2,
+  AlertTriangle,
+  X
 } from "lucide-react";
 
 const Profile = () => {
-  // ------------ BASIC STATE ONLY (NO FIREBASE) ------------
-  const [isAuthReady, setIsAuthReady] = useState(true); // Always ready (no firebase)
+  // ------------ BASIC LOCAL STATE (NO FIREBASE) ------------
   const [profileLoading, setProfileLoading] = useState(false);
 
   const [displayName, setDisplayName] = useState("Guest User");
-  const [profileEmail, setProfileEmail] = useState("guest@example.com");
+  const [profileEmail] = useState("guest@example.com");
   const [avatarUrl, setAvatarUrl] = useState(
     "https://placehold.co/100x100/A5B4FC/ffffff?text=U"
   );
 
-  const userId = "LOCAL-USER-12345"; // Mock userId (no firebase)
+  const [toast, setToast] = useState(null);
+  const userId = "LOCAL-USER-12345";
 
-  // ------------ STUB ACTIONS (NO BACKEND YET) ------------
-  const handleProfileSave = () => {
-    setProfileLoading(true);
-    setTimeout(() => {
-      setProfileLoading(false);
-      alert("Profile updated (local only, no backend)");
-    }, 1000);
+  // ------------ TOAST NOTIFICATION ------------
+  const showToast = (text, type = "success") => {
+    setToast({ text, type });
+    setTimeout(() => setToast(null), 3000);
   };
 
-  const handlePasswordSave = () => {
-    alert("Password change clicked (logic will be added later)");
-  };
-
-  const handleLogout = () => {
-    alert("Logout clicked (no auth yet)");
-  };
-
-  const handleDelete = () => {
-    alert("Delete account clicked (no backend)");
-  };
-
+  // ------------ AVATAR UPLOAD ------------
   const handleAvatarUpload = (e) => {
     const file = e.target.files[0];
-    if (!file) return;
+    if (!file) return showToast("No file selected", "error");
+
     const reader = new FileReader();
     reader.onloadend = () => setAvatarUrl(reader.result);
     reader.readAsDataURL(file);
+
+    showToast("Avatar updated (preview only)");
   };
 
-  // ------------ LOADING SCREEN (STATIC) ------------
-  if (!isAuthReady) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
-        <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
-        <p className="mt-4 text-gray-600">Loading Profile...</p>
-      </div>
-    );
-  }
+  // ------------ SAVE PROFILE (LOCAL) ------------
+  const handleProfileSave = () => {
+    setProfileLoading(true);
 
-  // ---------------------------------------------------------
-  //                  PROFILE PAGE UI (NO FIREBASE)
-  // ---------------------------------------------------------
+    setTimeout(() => {
+      setProfileLoading(false);
+      showToast("Profile updated successfully!");
+    }, 800);
+  };
+
+  // ------------ OTHER BUTTONS (STUBS) ------------
+  const handlePasswordSave = () => showToast("Password change clicked");
+  const handleLogout = () => showToast("Logout clicked", "info");
+  const handleDelete = () => showToast("Delete Account clicked", "error");
+
   return (
-    <div className="min-h-screen bg-gray-50 p-6 md:p-10 font-inter">
+    <div className="min-h-screen bg-gray-50 p-6 md:p-10 font-inter relative">
+
+      {/* 🔥 TOAST NOTIFICATION */}
+      {toast && (
+        <div
+          className={`fixed top-4 right-4 px-5 py-3 rounded-lg shadow-xl text-white z-50 flex items-center space-x-3 animate-fadeIn 
+            ${toast.type === "success" ? "bg-green-600" : ""}
+            ${toast.type === "error" ? "bg-red-600" : ""}
+            ${toast.type === "info" ? "bg-blue-600" : ""}
+          `}
+        >
+          {toast.type === "error" && <AlertTriangle className="w-5 h-5" />}
+          <span>{toast.text}</span>
+        </div>
+      )}
+
       <div className="w-full max-w-6xl mx-auto">
 
         {/* Header */}
@@ -95,12 +103,16 @@ const Profile = () => {
 
               {/* Avatar */}
               <div className="flex items-center space-x-6 pb-6 border-b">
-                <div className="relative w-28 h-28 rounded-full overflow-hidden border-4 border-indigo-300">
-                  <img src={avatarUrl} alt="Avatar" />
-                  <label className="absolute inset-0 bg-black bg-opacity-40 text-white 
-                    flex items-center justify-center opacity-0 hover:opacity-100 cursor-pointer">
-                    <Camera className="w-6 h-6" />
-                    <input type="file" className="hidden" onChange={handleAvatarUpload}/>
+                <div className="relative w-28 h-28 rounded-full overflow-hidden border-4 border-indigo-300 shadow-lg group">
+                  <img src={avatarUrl} alt="Avatar" className="object-cover w-full h-full" />
+
+                  <label
+                    className="absolute inset-0 bg-black bg-opacity-40 text-white flex flex-col items-center justify-center 
+                    opacity-0 group-hover:opacity-100 cursor-pointer transition"
+                  >
+                    <Camera className="w-6 h-6 mb-1" />
+                    <span className="text-sm">Upload</span>
+                    <input type="file" className="hidden" onChange={handleAvatarUpload} />
                   </label>
                 </div>
 
@@ -113,9 +125,7 @@ const Profile = () => {
 
               {/* Name Input */}
               <div className="mt-6">
-                <label className="block text-gray-700 mb-1">
-                  Username / Display Name
-                </label>
+                <label className="block text-gray-700 mb-1">Username / Display Name</label>
                 <input
                   type="text"
                   className="w-full border px-3 py-2 rounded-lg"
@@ -127,8 +137,14 @@ const Profile = () => {
               <button
                 onClick={handleProfileSave}
                 className="mt-6 px-6 py-2 rounded-lg bg-indigo-600 text-white shadow-md flex items-center"
+                disabled={profileLoading}
               >
-                <Save className="mr-2" /> Save Changes
+                {profileLoading ? (
+                  <Loader2 className="mr-2 w-5 h-5 animate-spin" />
+                ) : (
+                  <Save className="mr-2" />
+                )}
+                {profileLoading ? "Saving..." : "Save Changes"}
               </button>
             </div>
 
@@ -139,9 +155,9 @@ const Profile = () => {
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <input type="password" placeholder="Current Password" className="border px-3 py-2 rounded-lg"/>
-                <input type="password" placeholder="New Password" className="border px-3 py-2 rounded-lg"/>
-                <input type="password" placeholder="Confirm Password" className="border px-3 py-2 rounded-lg"/>
+                <input type="password" placeholder="Current Password" className="border px-3 py-2 rounded-lg" />
+                <input type="password" placeholder="New Password" className="border px-3 py-2 rounded-lg" />
+                <input type="password" placeholder="Confirm Password" className="border px-3 py-2 rounded-lg" />
               </div>
 
               <button
@@ -161,6 +177,7 @@ const Profile = () => {
               <h2 className="text-2xl font-bold border-b pb-3 mb-6 flex items-center text-gray-800">
                 <Clipboard className="mr-2 text-indigo-600" /> Activity Stats
               </h2>
+
               <div className="p-4 bg-indigo-50 rounded-xl text-center shadow-md">
                 <LayoutGrid className="mx-auto text-indigo-600 mb-2" />
                 <span className="text-3xl font-bold text-indigo-800">0</span>
