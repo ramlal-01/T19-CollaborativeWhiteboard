@@ -1,14 +1,16 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Landing from "./pages/landing";
-import Dashboard from "./pages/Dashboard";
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import Landing from './pages/landing'
+import Dashboard from './pages/Dashboard'
 
-export default function App() {
+function App() {
   return (
-    <Router>
+    <BrowserRouter>
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
-    </Router>
-  );
+    </BrowserRouter>
+  )
 }
+
+export default App
