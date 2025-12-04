@@ -10,12 +10,28 @@ import {
   Plus,
   Trello,
   Clock,
-  Workflow
+  Workflow,
+  Grid,
+  List,
+  MoreHorizontal,
+  Share2,
+  Edit3,
+  Trash2,
+  ExternalLink,
+  Layout
 } from 'lucide-react';
 
 const Dashboard = ({ onLogout, onOpenBoard }) => {
   const [profileOpen, setProfileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState('grid');
+
+  // Mock Boards
+  const myBoards = [
+    { id: 1, title: 'Q4 Marketing Strategy', date: 'Edited 2 mins ago', thumbnail: 'bg-indigo-50', icon: <Layout className="text-indigo-400" /> },
+    { id: 2, title: 'App UI Wireframes', date: 'Edited 1 hour ago', thumbnail: 'bg-cyan-50', icon: <Layout className="text-cyan-400" /> },
+    { id: 3, title: 'Database Schema', date: 'Edited yesterday', thumbnail: 'bg-slate-50', icon: <Workflow className="text-slate-400" /> },
+  ];
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] font-sans text-slate-900">
@@ -25,10 +41,9 @@ const Dashboard = ({ onLogout, onOpenBoard }) => {
       ============================== */}
       <nav className="h-18 bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 lg:px-8 
                       flex items-center justify-between sticky top-0 z-50">
-
-        {/* Logo */}
+        
         <div className="flex items-center gap-2.5 cursor-pointer group">
-          <div className="w-9 h-9 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
+          <div className="w-9 h-9 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg">
             <Zap size={18} className="text-white" />
           </div>
           <span className="text-lg font-bold tracking-tight">
@@ -36,7 +51,6 @@ const Dashboard = ({ onLogout, onOpenBoard }) => {
           </span>
         </div>
 
-        {/* Search */}
         <div className="hidden md:flex flex-1 max-w-md mx-8 relative group">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
           <input 
@@ -45,30 +59,25 @@ const Dashboard = ({ onLogout, onOpenBoard }) => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 bg-slate-100 border border-slate-200 rounded-xl
-                       focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 
-                       outline-none text-sm placeholder:text-slate-400"
+                       focus:bg-white focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10"
           />
         </div>
 
-        {/* Right Icons */}
         <div className="flex items-center gap-5">
 
-          {/* Notifications */}
           <button className="relative p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-full">
             <Bell size={20}/>
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
           </button>
 
-          {/* Profile Dropdown */}
           <div className="relative">
-
             <button 
               onClick={() => setProfileOpen(!profileOpen)}
               className="flex items-center gap-3 pl-5 border-l border-slate-200"
             >
               <div className="hidden lg:block text-right">
-                <p className="text-sm font-bold text-slate-800 leading-none mb-1">Alex Designer</p>
-                <p className="text-[11px] font-medium text-slate-400 leading-none">Pro Plan</p>
+                <p className="text-sm font-bold text-slate-800">Alex Designer</p>
+                <p className="text-[11px] text-slate-400">Pro Plan</p>
               </div>
 
               <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-indigo-100 to-purple-100 
@@ -76,20 +85,17 @@ const Dashboard = ({ onLogout, onOpenBoard }) => {
                  <span className="font-bold text-indigo-600 text-xs">AD</span>
               </div>
 
-              <ChevronDown size={14} className={`${profileOpen ? 'rotate-180' : ''} text-slate-400 transition-transform`} />
+              <ChevronDown size={14} className={`${profileOpen ? 'rotate-180' : ''} text-slate-400`} />
             </button>
 
-            {/* DROPDOWN MENU */}
             {profileOpen && (
               <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-xl border p-2 z-50">
-                
-                <button className="w-full px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 
-                                   flex items-center gap-3 rounded-lg">
+
+                <button className="w-full px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 flex items-center gap-3 rounded-lg">
                   <User size={16} /> Edit Profile
                 </button>
 
-                <button className="w-full px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 
-                                   flex items-center gap-3 rounded-lg">
+                <button className="w-full px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 flex items-center gap-3 rounded-lg">
                   <Settings size={16} /> Settings
                 </button>
 
@@ -97,8 +103,7 @@ const Dashboard = ({ onLogout, onOpenBoard }) => {
 
                 <button 
                   onClick={onLogout}
-                  className="w-full px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 
-                             flex items-center gap-3 rounded-lg">
+                  className="w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 rounded-lg">
                   <LogOut size={16} /> Logout
                 </button>
 
@@ -110,7 +115,7 @@ const Dashboard = ({ onLogout, onOpenBoard }) => {
 
 
       {/* ===================================================
-          PART 2 — NEW BOARD + TEMPLATES SECTION
+          PART 2 — NEW BOARD + TEMPLATES
       ===================================================== */}
       <main className="max-w-7xl mx-auto px-6 lg:px-8 py-8 space-y-12">
 
@@ -124,12 +129,10 @@ const Dashboard = ({ onLogout, onOpenBoard }) => {
 
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
 
-            {/* NEW BOARD */}
             <div 
               onClick={onOpenBoard}
               className="col-span-1 h-32 rounded-xl bg-indigo-600 hover:bg-indigo-700 
-                         transition-all cursor-pointer shadow-lg flex flex-col items-center 
-                         justify-center gap-3 text-white group"
+                         cursor-pointer shadow-lg flex flex-col items-center justify-center gap-3 text-white group"
             >
               <div className="p-2 bg-white/20 rounded-lg group-hover:scale-110 transition-transform">
                 <Plus size={24} />
@@ -137,36 +140,145 @@ const Dashboard = ({ onLogout, onOpenBoard }) => {
               <span className="font-semibold text-sm">New Board</span>
             </div>
 
-            {/* Templates */}
-            {[
+            {[ 
               { id: 'kanban', name: 'Kanban', color: 'bg-orange-100', text: 'text-orange-600', icon: <Trello size={20} /> },
               { id: 'retro', name: 'Retrospective', color: 'bg-purple-100', text: 'text-purple-600', icon: <Clock size={20} /> },
-              { id: 'flow', name: 'Flowchart', color: 'bg-green-100', text: 'text-green-600', icon: <Workflow size={20} /> }
+              { id: 'flow', name: 'Flowchart', color: 'bg-green-100', text: 'text-green-600', icon: <Workflow size={20} /> },
             ].map((t) => (
               <div 
                 key={t.id}
                 onClick={onOpenBoard}
                 className="col-span-1 h-32 rounded-xl bg-white border border-slate-200 
-                           hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer 
-                           flex flex-col p-4 group"
+                           hover:border-indigo-300 hover:shadow-md cursor-pointer flex flex-col p-4 group"
               >
-                <div className={`w-10 h-10 ${t.color} ${t.text} rounded-lg flex items-center 
-                                justify-center mb-auto group-hover:scale-105 transition-transform`}>
+                <div className={`w-10 h-10 ${t.color} ${t.text} rounded-lg flex items-center justify-center mb-auto`}>
                   {t.icon}
                 </div>
 
-                <div>
-                  <span className="block text-sm font-semibold text-slate-700 
-                                   group-hover:text-indigo-600 transition-colors">
-                    {t.name}
-                  </span>
-                  <span className="text-[10px] text-slate-400">Default layout</span>
-                </div>
+                <span className="block text-sm font-semibold text-slate-700 group-hover:text-indigo-600">
+                  {t.name}
+                </span>
+                <span className="text-[10px] text-slate-400">Default layout</span>
               </div>
             ))}
-
           </div>
         </section>
+
+
+{/* ===================================================
+        PART 3 — RECENT BOARDS SECTION
+======================================================= */}
+
+<section>
+  <div className="flex items-center justify-between mb-6">
+    <div className="flex items-center gap-3">
+      <h3 className="text-xl font-bold text-slate-800">Recent Boards</h3>
+      <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 text-xs font-bold">
+        {myBoards.length}
+      </span>
+    </div>
+
+    <div className="flex bg-white border border-slate-200 rounded-lg p-0.5">
+      <button 
+        onClick={() => setViewMode('grid')}
+        className={`p-1.5 rounded-md ${viewMode === 'grid' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
+      >
+        <Grid size={16} />
+      </button>
+
+      <button 
+        onClick={() => setViewMode('list')}
+        className={`p-1.5 rounded-md ${viewMode === 'list' ? 'bg-indigo-50 text-indigo-600' : 'text-slate-400 hover:text-slate-600'}`}
+      >
+        <List size={16} />
+      </button>
+    </div>
+  </div>
+
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+
+    {myBoards.map(board => (
+      <div 
+        key={board.id}
+        onClick={onOpenBoard}
+        className="group bg-white rounded-2xl border border-slate-200 hover:border-indigo-200 
+                   hover:shadow-xl flex flex-col overflow-hidden cursor-pointer transition-all"
+      >
+        
+        {/* Preview Area */}
+        <div className={`h-40 ${board.thumbnail} relative p-6`}>
+          
+          <div className="absolute top-4 left-4 w-24 h-2 bg-white/40 rounded-full"></div>
+          <div className="absolute top-8 left-4 w-16 h-2 bg-white/40 rounded-full"></div>
+
+          <div className="absolute bottom-4 right-4 w-8 h-8 bg-white rounded-lg shadow-sm 
+                          flex items-center justify-center">
+            {board.icon}
+          </div>
+
+          {/* Hover Overlay */}
+          <div className="absolute inset-0 bg-black/5 backdrop-blur-[1px] opacity-0 
+                          group-hover:opacity-100 flex items-center justify-center transition-opacity">
+            <button className="bg-white text-slate-900 px-5 py-2 rounded-full text-sm font-bold shadow-lg 
+                               flex items-center gap-2 hover:bg-indigo-50">
+              Open <ExternalLink size={14} />
+            </button>
+          </div>
+        </div>
+
+        {/* Card Body */}
+        <div className="p-5 flex-1 flex flex-col">
+
+          <div className="flex justify-between items-start mb-1">
+            <h4 className="font-bold text-slate-800 group-hover:text-indigo-600 transition-colors line-clamp-1 pr-4">
+              {board.title}
+            </h4>
+
+            <button onClick={(e) => e.stopPropagation()} className="text-slate-400 hover:text-slate-600 p-1 rounded-md">
+              <MoreHorizontal size={16} />
+            </button>
+          </div>
+
+          <p className="text-xs text-slate-400 mb-5 flex items-center gap-1.5">
+            <Clock size={12} /> {board.date}
+          </p>
+
+          <div className="mt-auto flex items-center gap-1 border-t border-slate-50 pt-3 opacity-60 
+                          group-hover:opacity-100 transition-opacity">
+            
+            <button 
+              onClick={(e) => e.stopPropagation()}
+              className="flex-1 py-1.5 text-xs flex items-center justify-center gap-1.5 text-slate-600 
+                         hover:text-indigo-600 hover:bg-indigo-50 rounded-md">
+              <Share2 size={14} /> Share
+            </button>
+            
+            <div className="w-px h-3 bg-slate-200"></div>
+
+            <button 
+              onClick={(e) => e.stopPropagation()}
+              className="flex-1 py-1.5 text-xs flex items-center justify-center gap-1.5 text-slate-600 
+                         hover:text-indigo-600 hover:bg-indigo-50 rounded-md">
+              <Edit3 size={14} /> Rename
+            </button>
+
+            <div className="w-px h-3 bg-slate-200"></div>
+
+            <button 
+              onClick={(e) => e.stopPropagation()}
+              className="flex-1 py-1.5 text-xs flex items-center justify-center gap-1.5 text-red-600 
+                         hover:bg-red-50 rounded-md">
+              <Trash2 size={14} /> Delete
+            </button>
+
+          </div>
+        </div>
+      </div>
+    ))}
+
+  </div>
+</section>
+
 
       </main>
     </div>
