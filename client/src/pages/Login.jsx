@@ -1,9 +1,11 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     // Basic validation
@@ -26,7 +28,8 @@ const Login = () => {
 
       console.log("API Response: ", response.data);
 
-      alert("Login Successful! (Redirect will be added in Commit 5)");
+      // alert("Login Successful! (Redirect will be added in Commit 5)");
+      navigate("/profile");
 
     } catch (error) {
       console.log("Login Error:", error);
