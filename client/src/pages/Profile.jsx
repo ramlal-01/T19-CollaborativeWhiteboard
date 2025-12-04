@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 import {
   User,
   Edit,
@@ -11,16 +10,95 @@ import {
   Clipboard,
   LayoutGrid,
   Clock,
+  Loader2
 } from "lucide-react";
 
+import { initializeApp } from "firebase/app";
+import {
+  getAuth,
+  signInAnonymously,
+  onAuthStateChanged,
+  signOut
+} from "firebase/auth";
+import {
+  getFirestore
+} from "firebase/firestore";
+
+// --- FIREBASE CONFIG FROM ENV / GLOBAL VARIABLE ---
+const firebaseConfig =
+  typeof __firebase_config !== "undefined"
+    ? JSON.parse(__firebase_config)
+    : {};
+
+const appId =
+  typeof __app_id !== "undefined" ? __app_id : "default-app-id";
+
 const Profile = () => {
-  const navigate = useNavigate();
+  // 🔹 Firebase State
+  const [db, setDb] = useState(null);
+  const [auth, setAuth] = useState(null);
+
+  // 🔹 Auth State
+  const [user, setUser] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [isAuthReady, setIsAuthReady] = useState(false);
+
+  // 🔹 UI State
+  const [profileLoading, setProfileLoading] = useState(true);
+
+  // 🔹 Basic Profile Data
   const [displayName, setDisplayName] = useState("Guest User");
   const [profileEmail, setProfileEmail] = useState("guest@example.com");
   const [avatarUrl, setAvatarUrl] = useState(
     "https://placehold.co/100x100/A5B4FC/ffffff?text=U"
   );
 
+  // ----------------------------------------------------
+  // ⭐ COMMIT 2: FIREBASE INITIALIZATION + AUTH HANDLING
+  // ----------------------------------------------------
+  useEffect(() => {
+    try {
+      const app = initializeApp(firebaseConfig);
+      const firestore = getFirestore(app);
+      const firebaseAuth = getAuth(app);
+
+      setDb(firestore);
+      setAuth(firebaseAuth);
+
+      const unsubscribe = onAuthStateChanged(firebaseAuth, async currentUser => {
+        if (currentUser) {
+          setUser(currentUser);
+          setUserId(currentUser.uid);
+
+          setDisplayName(`User-${currentUser.uid.substring(0, 8)}`);
+          setProfileEmail(`user_${currentUser.uid.substring(0, 4)}@example.com`);
+        } else {
+          await signInAnonymously(firebaseAuth);
+        }
+
+        setIsAuthReady(true);
+        setProfileLoading(false);
+      });
+
+      return () => unsubscribe();
+    } catch (err) {
+      console.error("Firebase init error:", err);
+      setProfileLoading(false);
+    }
+  }, []);
+
+  if (!isAuthReady) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+        <Loader2 className="w-10 h-10 text-indigo-600 animate-spin" />
+        <p className="mt-4 text-gray-600">Initializing Profile...</p>
+      </div>
+    );
+  }
+
+  // --------------------------
+  // UI RENDER (Same as commit 1)
+  // --------------------------
   return (
     <div className="min-h-screen bg-gray-50 p-6 md:p-10 font-inter">
       <div className="w-full max-w-6xl mx-auto">
@@ -66,7 +144,7 @@ const Profile = () => {
                   type="text"
                   className="w-full border px-3 py-2 rounded-lg"
                   value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
+                  onChange={e => setDisplayName(e.target.value)}
                 />
               </div>
 
@@ -81,7 +159,6 @@ const Profile = () => {
                 <Key className="mr-2 text-indigo-600" /> Change Password
               </h2>
 
-              {/* Password Inputs */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <input
                   type="password"
@@ -132,9 +209,7 @@ const Profile = () => {
               <h2 className="text-2xl font-bold text-red-600 border-b pb-3 mb-6 flex items-center">
                 <Trash2 className="mr-2" /> Danger Zone
               </h2>
-              <button 
-                onClick={() => navigate("/login")}
-                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg shadow mb-4">
+              <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg shadow mb-4">
                 <LogOut className="mr-2 inline" /> Logout
               </button>
               <button className="w-full px-4 py-2 bg-red-600 text-white rounded-lg shadow">
