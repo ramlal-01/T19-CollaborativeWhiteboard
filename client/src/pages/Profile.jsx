@@ -15,11 +15,10 @@ import {
 
 const Profile = () => {
   // ------------ BASIC STATE ONLY (NO FIREBASE) ------------
-  const [isAuthReady, setIsAuthReady] = useState(true); // Always ready (no firebase)
-  const [profileLoading, setProfileLoading] = useState(false);
+  const [isAuthReady] = useState(true); // Always ready (no firebase)
 
   const [displayName, setDisplayName] = useState("Guest User");
-  const [profileEmail, setProfileEmail] = useState("guest@example.com");
+  const [profileEmail] = useState("guest@example.com");
   const [avatarUrl, setAvatarUrl] = useState(
     "https://placehold.co/100x100/A5B4FC/ffffff?text=U"
   );
@@ -28,11 +27,7 @@ const Profile = () => {
 
   // ------------ STUB ACTIONS (NO BACKEND YET) ------------
   const handleProfileSave = () => {
-    setProfileLoading(true);
-    setTimeout(() => {
-      setProfileLoading(false);
-      alert("Profile updated (local only, no backend)");
-    }, 1000);
+    alert("Profile updated (local only, no backend)");
   };
 
   const handlePasswordSave = () => {
