@@ -76,7 +76,7 @@ const Dashboard = () => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    navigate('/login');
+    navigate('/');
   };
 
   const handleOpenBoard = (boardId) => {
@@ -92,6 +92,20 @@ const Dashboard = () => {
     } catch (error) {
       console.error('Failed to create board', error);
       alert('Failed to create board');
+    }
+  };
+
+  const handleJoinByCode = async () => {
+    const inviteCode = window.prompt('Enter room code to join');
+    if (!inviteCode) return;
+    try {
+      const response = await api.post('/api/boards/join', { inviteCode });
+      const board = response.data;
+      handleOpenBoard(board._id);
+    } catch (error) {
+      console.error('Failed to join board', error);
+      const message = error.response?.data?.message || 'Invalid code or unable to join';
+      alert(message);
     }
   };
 
@@ -191,10 +205,18 @@ const Dashboard = () => {
 
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-bold text-slate-800">Start a new board</h2>
-            <button className="text-sm font-medium text-indigo-600 hover:text-indigo-700">
-              More templates
-            </button>
+            <h2 className="text-lg font-bold text-slate-800">Your boards</h2>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleJoinByCode}
+                className="px-3 py-1.5 text-xs rounded-md border border-slate-200 text-slate-700 hover:bg-slate-50"
+              >
+                Join room by code
+              </button>
+              <button className="text-sm font-medium text-indigo-600 hover:text-indigo-700">
+                More templates
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">

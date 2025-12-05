@@ -1,24 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Zap, 
-  Globe, 
-  Cpu, 
-  Layout, 
-  Users, 
-  Lock, 
-  ArrowRight, 
-  Github, 
-  Twitter, 
-  Menu, 
+  Zap,
+  Users,
+  ArrowRight,
+  Menu,
   X,
-  Play,
-  Code2,
-  Database,
-  Cloud,
-  Mail,
-  User,
-  ArrowLeft,
-  Chrome,
   PenTool,
   Save,
   MessageSquare
@@ -26,258 +12,50 @@ import {
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
 
-// Sliding Auth Component
-const AuthPage = ({ onBack }) => {
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [signUpName, setSignUpName] = useState('');
-  const [signUpEmail, setSignUpEmail] = useState('');
-  const [signUpPassword, setSignUpPassword] = useState('');
-  const [signInEmail, setSignInEmail] = useState('');
-  const [signInPassword, setSignInPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const navigate = useNavigate();
-
-  const handleSignUp = async (e) => {
-    e.preventDefault();
-    if (!signUpName.trim() || !signUpEmail.trim() || !signUpPassword.trim()) {
-      alert('All fields are required');
-      return;
-    }
-    try {
-      setLoading(true);
-      const response = await api.post('/api/auth/register', {
-        name: signUpName,
-        email: signUpEmail,
-        password: signUpPassword,
-      });
-      const { token, user } = response.data;
-      if (token) localStorage.setItem('token', token);
-      if (user) localStorage.setItem('user', JSON.stringify(user));
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Sign up error:', error);
-      const message = error.response?.data?.message || 'Registration failed';
-      alert(message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSignIn = async (e) => {
-    e.preventDefault();
-    if (!signInEmail.trim() || !signInPassword.trim()) {
-      alert('Email and password are required');
-      return;
-    }
-    try {
-      setLoading(true);
-      const response = await api.post('/api/auth/login', {
-        email: signInEmail,
-        password: signInPassword,
-      });
-      const { token, user } = response.data;
-      if (token) localStorage.setItem('token', token);
-      if (user) localStorage.setItem('user', JSON.stringify(user));
-      navigate('/dashboard');
-    } catch (error) {
-      console.error('Sign in error:', error);
-      const message = error.response?.data?.message || 'Login failed';
-      alert(message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 relative overflow-hidden font-sans">
-      {/* Background Decor */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-cyan-200/40 rounded-full blur-[100px] mix-blend-multiply"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-blue-200/40 rounded-full blur-[100px] mix-blend-multiply"></div>
-
-      <button 
-        onClick={onBack}
-        className="absolute top-6 left-6 flex items-center gap-2 text-slate-500 hover:text-cyan-600 font-semibold z-10 transition-colors bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm hover:shadow-md"
-      >
-        <ArrowLeft size={18} /> Back to Home
-      </button>
-
-      {/* Main Container */}
-      <div className="bg-white rounded-[20px] shadow-2xl shadow-slate-200/50 relative overflow-hidden w-full max-w-[900px] min-h-[600px] border border-slate-100">
-        
-        {/* Sign Up Form Container */}
-        <div className={`absolute top-0 h-full w-1/2 left-0 transition-all duration-700 ease-in-out flex flex-col items-center justify-center p-12 bg-white ${isSignUp ? 'translate-x-[100%] opacity-100 z-50' : 'opacity-0 z-10'}`}>
-          <form className="w-full flex flex-col items-center" onSubmit={handleSignUp}>
-            <h1 className="text-3xl font-bold mb-6 text-slate-800">Join the Session</h1>
-            
-            <div className="flex gap-4 mb-6">
-              <button className="w-12 h-12 rounded-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50 hover:border-cyan-200 hover:text-cyan-600 transition-all shadow-sm">
-                <Chrome size={20} />
-              </button>
-              <button className="w-12 h-12 rounded-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50 hover:border-cyan-200 hover:text-cyan-600 transition-all shadow-sm">
-                <Github size={20} />
-              </button>
-            </div>
-            
-            <span className="text-xs font-medium text-slate-400 mb-6 uppercase tracking-wider">or create new account</span>
-            
-            <div className="w-full space-y-4 mb-8">
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User size={18} className="text-slate-400 group-focus-within:text-cyan-500 transition-colors" />
-                </div>
-                <input 
-                  type="text" 
-                  placeholder="Full Name" 
-                  value={signUpName}
-                  onChange={(e) => setSignUpName(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all text-sm text-slate-700 placeholder-slate-400" 
-                />
-              </div>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail size={18} className="text-slate-400 group-focus-within:text-cyan-500 transition-colors" />
-                </div>
-                <input 
-                  type="email" 
-                  placeholder="Email Address" 
-                  value={signUpEmail}
-                  onChange={(e) => setSignUpEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all text-sm text-slate-700 placeholder-slate-400" 
-                />
-              </div>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock size={18} className="text-slate-400 group-focus-within:text-cyan-500 transition-colors" />
-                </div>
-                <input 
-                  type="password" 
-                  placeholder="Password" 
-                  value={signUpPassword}
-                  onChange={(e) => setSignUpPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all text-sm text-slate-700 placeholder-slate-400" 
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-cyan-500 text-white px-12 py-3.5 rounded-lg font-bold uppercase tracking-wider text-xs hover:bg-cyan-600 hover:shadow-lg hover:shadow-cyan-500/30 transition-all transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed">
-              {loading ? 'Signing up...' : 'Sign Up'}
-            </button>
-          </form>
-        </div>
-
-        {/* Sign In Form Container */}
-        <div className={`absolute top-0 h-full w-1/2 left-0 transition-all duration-700 ease-in-out flex flex-col items-center justify-center p-12 bg-white z-20 ${isSignUp ? 'translate-x-[100%]' : ''}`}>
-          <form className="w-full flex flex-col items-center" onSubmit={handleSignIn}>
-            <h1 className="text-3xl font-bold mb-6 text-slate-800">Welcome Back</h1>
-            
-            <div className="flex gap-4 mb-6">
-              <button className="w-12 h-12 rounded-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50 hover:border-cyan-200 hover:text-cyan-600 transition-all shadow-sm">
-                <Chrome size={20} />
-              </button>
-              <button className="w-12 h-12 rounded-lg border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50 hover:border-cyan-200 hover:text-cyan-600 transition-all shadow-sm">
-                <Github size={20} />
-              </button>
-            </div>
-            
-            <span className="text-xs font-medium text-slate-400 mb-6 uppercase tracking-wider">or sign in with email</span>
-            
-            <div className="w-full space-y-4 mb-6">
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail size={18} className="text-slate-400 group-focus-within:text-cyan-500 transition-colors" />
-                </div>
-                <input 
-                  type="email" 
-                  placeholder="Email Address" 
-                  value={signInEmail}
-                  onChange={(e) => setSignInEmail(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all text-sm text-slate-700 placeholder-slate-400" 
-                />
-              </div>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock size={18} className="text-slate-400 group-focus-within:text-cyan-500 transition-colors" />
-                </div>
-                <input 
-                  type="password" 
-                  placeholder="Password" 
-                  value={signInPassword}
-                  onChange={(e) => setSignInPassword(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:bg-white focus:outline-none focus:ring-2 focus:ring-cyan-500/20 focus:border-cyan-500 transition-all text-sm text-slate-700 placeholder-slate-400" 
-                />
-              </div>
-            </div>
-
-            <a href="#" className="text-xs font-semibold text-slate-500 mb-8 hover:text-cyan-600 hover:underline transition-colors">Forgot your password?</a>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-cyan-500 text-white px-12 py-3.5 rounded-lg font-bold uppercase tracking-wider text-xs hover:bg-cyan-600 hover:shadow-lg hover:shadow-cyan-500/30 transition-all transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-60 disabled:cursor-not-allowed">
-              {loading ? 'Signing in...' : 'Sign In'}
-            </button>
-          </form>
-        </div>
-
-        {/* Overlay Container */}
-        <div className={`absolute top-0 left-1/2 w-1/2 h-full overflow-hidden transition-transform duration-700 ease-in-out z-100 ${isSignUp ? '-translate-x-full' : ''}`}>
-          <div className={`bg-gradient-to-br from-cyan-500 to-blue-600 text-white relative -left-full h-full w-[200%] transform transition-transform duration-700 ease-in-out ${isSignUp ? 'translate-x-1/2' : 'translate-x-0'}`}>
-            
-            {/* Background Pattern on Overlay */}
-            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-white via-transparent to-transparent" />
-            
-            {/* Overlay Left Panel (For Sign In) */}
-            <div className={`absolute top-0 flex flex-col items-center justify-center h-full w-1/2 transform transition-transform duration-700 ease-in-out px-12 text-center ${isSignUp ? 'translate-x-0' : '-translate-x-[20%]'}`}>
-              <h1 className="text-4xl font-bold mb-6 tracking-tight">FluxBoard</h1>
-              <p className="mb-8 text-cyan-50 text-lg leading-relaxed">Collaborate with your team in real-time. Log in to access your saved whiteboards.</p>
-              <button 
-                onClick={() => setIsSignUp(false)}
-                className="bg-transparent border-2 border-white text-white px-12 py-3 rounded-lg font-bold uppercase tracking-wider text-xs hover:bg-white hover:text-cyan-600 transition-all hover:shadow-lg"
-              >
-                Sign In
-              </button>
-            </div>
-
-            {/* Overlay Right Panel (For Sign Up) */}
-            <div className={`absolute top-0 right-0 flex flex-col items-center justify-center h-full w-1/2 transform transition-transform duration-700 ease-in-out px-12 text-center ${isSignUp ? 'translate-x-[20%]' : 'translate-x-0'}`}>
-              <h1 className="text-4xl font-bold mb-6 tracking-tight">New Here?</h1>
-              <p className="mb-8 text-cyan-50 text-lg leading-relaxed">Start brainstorming today. Join 1,000+ teams using FluxBoard for remote work.</p>
-              <button 
-                onClick={() => setIsSignUp(true)}
-                className="bg-transparent border-2 border-white text-white px-12 py-3 rounded-lg font-bold uppercase tracking-wider text-xs hover:bg-white hover:text-cyan-600 transition-all hover:shadow-lg"
-              >
-                Sign Up
-              </button>
-            </div>
-
-          </div>
-        </div>
-
-      </div>
-    </div>
-  );
-};
-
 export default function App() {
   const [activeFeature, setActiveFeature] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [showAuth, setShowAuth] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
 
-  // Auto-rotate features
+  const navigate = useNavigate();
+
+  const handleJoinRoomFromLanding = async () => {
+    if (!currentUser) {
+      navigate('/login');
+      return;
+    }
+    const inviteCode = window.prompt('Enter room code to join');
+    if (!inviteCode) return;
+    try {
+      const response = await api.post('/api/boards/join', { inviteCode });
+      const board = response.data;
+      navigate(`/boards/${board._id}`);
+    } catch (error) {
+      console.error('Failed to join board from landing', error);
+      const message = error.response?.data?.message || 'Invalid code or unable to join';
+      alert(message);
+    }
+  };
+
+  // Read current user from localStorage so we can show "Open dashboard" instead of "Log in"
+  useEffect(() => {
+    const stored = localStorage.getItem('user');
+    if (stored) {
+      try {
+        setCurrentUser(JSON.parse(stored));
+      } catch {
+        setCurrentUser(null);
+      }
+    }
+  }, []);
+
+  // Auto-rotate technical feature cards
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveFeature((prev) => (prev + 1) % 3);
     }, 4000);
     return () => clearInterval(interval);
   }, []);
-
-  if (showAuth) {
-    return <AuthPage onBack={() => setShowAuth(false)} />;
-  }
 
   return (
     <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-cyan-200 selection:text-cyan-900 overflow-x-hidden">
@@ -300,17 +78,38 @@ export default function App() {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-8">
-            {['Features', 'Architecture', 'Security', 'Enterprise'].map((item) => (
-              <a key={item} href={`#${item.toLowerCase()}`} className="text-sm font-medium text-slate-600 hover:text-cyan-600 transition-colors">
+            {['Features'].map((item) => (
+              <a
+                key={item}
+                href={`#${item.toLowerCase()}`}
+                className="text-sm font-medium text-slate-600 hover:text-cyan-600 transition-colors"
+              >
                 {item}
               </a>
             ))}
-            <button 
-              onClick={() => setShowAuth(true)}
-              className="bg-slate-900 text-white px-6 py-2.5 rounded-full text-sm font-bold hover:bg-slate-800 transition-all hover:shadow-lg transform hover:-translate-y-0.5"
-            >
-              Log In
-            </button>
+            {currentUser ? (
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="bg-slate-900 text-white px-6 py-2.5 rounded-full text-sm font-bold hover:bg-slate-800 transition-all hover:shadow-lg transform hover:-translate-y-0.5"
+              >
+                Open Dashboard
+              </button>
+            ) : (
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => navigate('/login')}
+                  className="text-sm font-semibold text-slate-700 hover:text-cyan-600"
+                >
+                  Log in
+                </button>
+                <button
+                  onClick={() => navigate('/register')}
+                  className="bg-slate-900 text-white px-6 py-2.5 rounded-full text-sm font-bold hover:bg-slate-800 transition-all hover:shadow-lg transform hover:-translate-y-0.5"
+                >
+                  Sign up
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Mobile Toggle */}
@@ -322,10 +121,38 @@ export default function App() {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden border-t border-slate-200 bg-white p-4 flex flex-col gap-4 shadow-xl animate-in slide-in-from-top-5">
-             {['Features', 'Architecture', 'Security'].map((item) => (
-              <a key={item} href="#" className="text-slate-600 hover:text-cyan-600 block py-2 font-medium">{item}</a>
+            {['Features'].map((item) => (
+              <a
+                key={item}
+                href={`#${item.toLowerCase()}`}
+                className="text-slate-600 hover:text-cyan-600 block py-2 font-medium"
+              >
+                {item}
+              </a>
             ))}
-            <button onClick={() => setShowAuth(true)} className="w-full bg-cyan-500 text-white py-3 rounded-lg font-bold">Log In</button>
+            {currentUser ? (
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="w-full bg-slate-900 text-white py-3 rounded-lg font-bold"
+              >
+                Open Dashboard
+              </button>
+            ) : (
+              <div className="flex flex-col gap-2">
+                <button
+                  onClick={() => navigate('/login')}
+                  className="w-full border border-slate-200 text-slate-800 py-3 rounded-lg font-bold hover:bg-slate-50"
+                >
+                  Log in
+                </button>
+                <button
+                  onClick={() => navigate('/register')}
+                  className="w-full bg-cyan-500 text-white py-3 rounded-lg font-bold"
+                >
+                  Sign up
+                </button>
+              </div>
+            )}
           </div>
         )}
       </nav>
@@ -336,27 +163,31 @@ export default function App() {
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-cyan-100 bg-cyan-50 text-cyan-700 text-xs font-mono mb-8 font-semibold">
               <span className="w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></span>
-              HACKATHON 2024: REAL-TIME COLLABORATION
+              Real-time collaborative whiteboard
             </div>
-            <h1 className="text-6xl md:text-7xl font-bold tracking-tight leading-[1.1] mb-8 text-slate-900">
-              Brainstorm, Draw, & <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 animate-gradient">
-                Annotate Together.
-              </span>
+            <h1 className="text-5xl md:text-6xl font-bold tracking-tight leading-[1.1] mb-6 text-slate-900">
+              Whiteboard with your team
+              <br />from anywhere.
             </h1>
-            <p className="text-lg text-slate-600 mb-10 leading-relaxed max-w-xl">
-              The ultimate collaborative whiteboard for remote teams and online education. Features real-time drawing, sticky notes, chat, and session management with &lt; 2s latency.
+            <p className="text-base text-slate-600 mb-3 leading-relaxed max-w-xl">
+              Draw together, drop sticky notes, and chat live on a shared canvas. Perfect for standups, classes, and quick brainstorms.
+            </p>
+            <p className="text-sm text-slate-500 mb-8">
+              {currentUser ? 'You are already signed in. Jump back into your workspace.' : 'Sign up in seconds and start your first board.'}
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <button 
-                onClick={() => setShowAuth(true)}
+                onClick={() => currentUser ? navigate('/dashboard') : navigate('/register')}
                 className="group bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-8 py-4 flex items-center gap-2 transition-all shadow-xl shadow-slate-900/10 hover:shadow-slate-900/20 hover:-translate-y-1"
               >
-                <span className="font-bold">Start Whiteboarding</span>
+                <span className="font-bold">{currentUser ? 'Open your boards' : 'Start Whiteboarding'}</span>
                 <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
               </button>
-              <button className="px-8 py-4 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 transition-colors font-semibold flex items-center gap-2 bg-white/50 backdrop-blur-sm">
-                <Github size={20} /> View Source
+              <button
+                onClick={handleJoinRoomFromLanding}
+                className="px-8 py-4 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 transition-colors font-semibold flex items-center gap-2 bg-white/50 backdrop-blur-sm"
+              >
+                Join room by code
               </button>
             </div>
           </div>
@@ -474,10 +305,8 @@ export default function App() {
                      <h3 className="text-2xl font-bold mb-6">Built for Teams</h3>
                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         {[
-                           { name: "Live Chat", icon: <MessageSquare /> },
-                           { name: "Export PDF", icon: <Save /> },
-                           { name: "Redis", icon: <Database /> },
-                           { name: "Node.js", icon: <Cpu /> }
+                           { name: "Live chat", icon: <MessageSquare /> },
+                           { name: "Export board", icon: <Save /> },
                         ].map((tech) => (
                            <div key={tech.name} className="flex flex-col items-center gap-3 p-4 bg-white/10 rounded-xl border border-white/5 hover:border-cyan-400/50 transition-colors backdrop-blur-sm">
                               <div className="text-cyan-400">{tech.icon}</div>
@@ -491,8 +320,8 @@ export default function App() {
          </div>
       </section>
 
-      {/* Feature Slider / Technical Deep Dive */}
-      <section className="py-24 bg-slate-50 border-y border-slate-200" id="architecture">
+      {/* Feature Slider / Technical Deep Dive (hidden for now) */}
+      <section className="hidden" id="architecture">
          <div className="max-w-7xl mx-auto px-6">
             <div className="grid lg:grid-cols-2 gap-16">
                <div className="space-y-8">
@@ -606,8 +435,8 @@ services:
          </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-24 px-6 text-center bg-white">
+      {/* CTA (hidden for now) */}
+      <section className="hidden">
          <div className="max-w-4xl mx-auto relative">
             <div className="absolute inset-0 bg-gradient-to-r from-cyan-100 to-blue-100 blur-[100px] opacity-60 pointer-events-none"></div>
             <h2 className="text-5xl font-bold mb-6 relative z-10 text-slate-900">Ready to deploy?</h2>
@@ -616,10 +445,10 @@ services:
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4 relative z-10">
                <button 
-                onClick={() => setShowAuth(true)}
+                onClick={() => currentUser ? navigate('/dashboard') : setShowAuth(true)}
                 className="bg-slate-900 text-white px-8 py-4 rounded-xl font-bold hover:bg-slate-800 transition-colors shadow-xl shadow-slate-900/10"
                >
-                  Create Session
+                  {currentUser ? 'Open Dashboard' : 'Create Session'}
                </button>
                <button className="bg-white border border-slate-200 text-slate-900 px-8 py-4 rounded-xl font-bold hover:bg-slate-50 transition-colors">
                   Read Documentation
